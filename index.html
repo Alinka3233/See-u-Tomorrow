@@ -101,14 +101,24 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
+        /* 针对 Firefox 的滚动条样式适配 (scrollbar-color: thumb track) */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode * {
+            scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+        }
+
         body {
             position: relative;
             display: flex;
             flex-direction: column;
-            background-color: #000;
+            background-color: var(--bg-color); /* 原来是 #000，改为背景色以防止在部分情况出现黑色背景 */
             font-family: "SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
             transition: background-color 0.4s var(--spring-easing);
-            min-width: 375px;
+            min-width: 320px;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
@@ -168,7 +178,8 @@
 
         .app-open .wallpaper {
             transform: scale(1.15);
-            filter: blur(50px) brightness(0.6) saturate(1.2);
+            filter: blur(20px) brightness(0.6) saturate(1.2);
+            will-change: transform, filter;
         }
 
         /* --- 主屏幕样式 --- */
@@ -196,14 +207,14 @@
         .apps-grid-container {
             flex-grow: 1;
             width: 100%;
-            max-width: 440px;
             overflow-y: auto;
             padding-top: 10px;
         }
 
         .apps-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+            justify-content: center;
             grid-auto-rows: min-content;
             gap: 24px 16px;
             width: 100%;
@@ -548,6 +559,7 @@
         .appstore-header, .appstore-list {
             width: 100%;
             max-width: 800px; /* 限制最大宽度，防止横向拉伸过长 */
+            margin: 0 auto;
         }
 
         .dark-mode #app-appstore {
@@ -646,16 +658,17 @@
                 padding: 60px 40px;
             }
             .apps-grid {
-                grid-template-columns: repeat(6, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
                 gap: 32px 24px;
-                max-width: 900px;
+                width: 100%;
             }
             .widget {
                 grid-column: span 2;
                 grid-row: span 2;
             }
             .dock {
-                max-width: 500px;
+                width: 100%;
+                max-width: 800px;
                 padding: 16px;
             }
         }
@@ -663,18 +676,20 @@
         /* 针对中等屏幕 (平板) */
         @media screen and (min-width: 768px) and (max-width: 1023px) {
             .apps-grid {
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
                 gap: 28px 20px;
+                width: 100%;
             }
             .dock {
-                max-width: 440px;
+                width: 100%;
+                max-width: 600px;
             }
         }
 
         /* 针对标准手机屏幕 (381px - 767px) */
         @media screen and (min-width: 381px) and (max-width: 767px) {
             .apps-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
                 gap: 24px 16px;
             }
         }
@@ -722,10 +737,10 @@
                 padding-top: 10px;
             }
             .apps-grid-container {
-                max-width: 90%;
+                width: 100%;
             }
             .apps-grid {
-                grid-template-columns: repeat(10, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
                 gap: 12px;
             }
             .widget {
@@ -734,6 +749,7 @@
             .dock {
                 bottom: 10px;
                 padding: 8px 20px;
+                width: 100%;
                 max-width: 80%;
             }
         }
@@ -1421,21 +1437,66 @@
         }
 
         .notes-item {
-            background: rgba(242, 242, 247, 0.8);
-            border-radius: 12px;
-            padding: 16px;
+            position: relative;
             margin-bottom: 12px;
+            overflow: hidden;
+            border-radius: 12px;
+            touch-action: pan-y;
+        }
+
+        .notes-item-main {
+            background: #f2f2f7; /* 使用纯色背景防止红色透出 */
+            padding: 16px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s;
+            position: relative;
+            z-index: 2;
         }
 
-        .dark-mode .notes-item {
-            background: rgba(44, 44, 46, 0.8);
+        .dark-mode .notes-item-main {
+            background: #2c2c2e; /* 使用纯色背景防止红色透出 */
         }
 
-        .notes-item:active {
-            transform: scale(0.98);
-            opacity: 0.7;
+        .notes-item-delete-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            background-color: #ff3b30;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 600;
+            z-index: 5; /* 确保在最上层 */
+            border-radius: 0 12px 12px 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: auto; /* 确保可点击 */
+        }
+
+        .notes-item.swiped .notes-item-delete-btn,
+        .notes-item.swiping .notes-item-delete-btn {
+            opacity: 1; /* 滑动中或已滑动状态下显示 */
+            transition: opacity 0.2s; /* 确保显示时也有动画 */
+        }
+
+        .notes-item.swiping .notes-item-main {
+            transition: none; /* 滑动时禁用动画，让跟随更跟手 */
+        }
+
+        .notes-item.swiped .notes-item-main {
+            transform: translateX(-80px) !important; /* 强制覆盖内联样式 */
+        }
+
+        .notes-item:active .notes-item-main {
+            background: rgba(230, 230, 235, 0.9);
+        }
+
+        .dark-mode .notes-item:active .notes-item-main {
+            background: rgba(54, 54, 56, 0.9);
         }
 
         .notes-item-title {
@@ -1531,6 +1592,18 @@
             align-items: center;
         }
 
+        .notes-editor-footer {
+            padding: 10px 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 0.5px solid rgba(0,0,0,0.1);
+        }
+
+        .dark-mode .notes-editor-footer {
+            border-top-color: rgba(255,255,255,0.1);
+        }
+
         .notes-editor-btn {
             color: #ffcc00;
             font-size: 17px;
@@ -1539,6 +1612,10 @@
             background: none;
             border: none;
             padding: 8px;
+        }
+
+        .notes-editor-btn:active {
+            opacity: 0.5;
         }
 
         .notes-editor-content {
@@ -1591,6 +1668,7 @@
             display: flex;
             justify-content: center;
             z-index: 3;
+            box-sizing: border-box;
         }
 
         .dock {
@@ -1598,8 +1676,8 @@
             max-width: 360px;
             padding: 12px;
             background: var(--glass-bg);
-            backdrop-filter: blur(60px) saturate(210%);
-            -webkit-backdrop-filter: blur(60px) saturate(210%);
+            backdrop-filter: blur(20px) saturate(210%);
+            -webkit-backdrop-filter: blur(20px) saturate(210%);
             border-radius: 28px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -1618,36 +1696,33 @@
         .app-page {
             position: absolute;
             top: 0;
-            left: 50%; /* 居中开始 */
-            transform: translateX(-50%) scale(0.9) translateY(40px); /* 水平居中 */
+            left: 0;
             width: 100%;
-            max-width: 500px; /* 限制全局宽度 */
             height: 100%;
             background-color: var(--bg-color);
             z-index: 100;
             display: flex;
             flex-direction: column;
             opacity: 0;
+            transform: scale(0.9) translateY(40px);
             transition: transform 0.6s var(--spring-easing), opacity 0.4s ease;
             pointer-events: none;
-            border-radius: var(--radius-xl);
             overflow: hidden;
             box-shadow: var(--shadow-xl);
         }
 
         .app-page.active {
-            transform: translateX(-50%) scale(1) translateY(0); /* 保持居中 */
+            transform: scale(1) translateY(0);
             opacity: 1;
             pointer-events: auto;
-            border-radius: 0;
         }
 
         .app-header {
             padding: 16px 20px;
             padding-top: calc(16px + env(safe-area-inset-top));
             background-color: var(--app-header-bg);
-            backdrop-filter: blur(50px) saturate(190%);
-            -webkit-backdrop-filter: blur(50px) saturate(190%);
+            backdrop-filter: blur(20px) saturate(190%);
+            -webkit-backdrop-filter: blur(20px) saturate(190%);
             border-bottom: 1px solid var(--border-color);
             z-index: 101;
             flex-shrink: 0;
@@ -1679,8 +1754,8 @@
             padding: 12px 16px;
             padding-top: calc(12px + env(safe-area-inset-top));
             background: var(--app-header-bg);
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -2004,8 +2079,8 @@
         .control-center-content {
             width: 240px; /* 进一步缩减至极致窄度 */
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(60px) saturate(210%);
-            -webkit-backdrop-filter: blur(60px) saturate(210%);
+            backdrop-filter: blur(20px) saturate(210%);
+            -webkit-backdrop-filter: blur(20px) saturate(210%);
             border-radius: 36px;
             padding: 14px; /* 略微减小内边距 */
             margin-top: calc(10px + env(safe-area-inset-top));
@@ -2224,23 +2299,36 @@
         }
 
 
-        /* --- 设置界面优化 --- */
+        /* --- 设置界面优化 (高级简约) --- */
         .settings-group {
-            background: var(--glass-bg);
-            margin: 16px 12px;
-            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            margin: 20px 16px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--glass-border);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+            border: 0.5px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .settings-group {
+            background: rgba(30, 30, 30, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
         }
 
         .settings-item {
-            padding: 12px 16px;
+            padding: 16px 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid var(--border-color);
-            transition: background 0.2s;
+            gap: 16px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            transition: background 0.2s ease;
             cursor: pointer;
+        }
+
+        .dark-mode .settings-item {
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
         }
 
         .settings-item:last-child {
@@ -2248,24 +2336,31 @@
         }
 
         .settings-item:active {
-            background: rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .dark-mode .settings-item:active {
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .item-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
-            font-size: 14px;
+            color: var(--text-color);
+            font-size: 18px;
+            opacity: 0.8;
         }
 
-        .settings-item span {
+        .settings-item > span {
             flex: 1;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 500;
+            letter-spacing: -0.2px;
+            color: var(--text-color);
         }
 
         #app-settings .switch {
@@ -2609,6 +2704,40 @@
             padding: 0;
             cursor: pointer;
             font-weight: 400;
+        }
+
+        /* --- 统一的高级简约返回键样式 --- */
+        .ios-back-btn {
+            color: var(--text-color) !important;
+            opacity: 0.85;
+            font-size: 17px !important;
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            display: flex !important;
+            align-items: center;
+            gap: 6px;
+            font-weight: 400 !important;
+            letter-spacing: -0.3px;
+            z-index: 2;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .ios-back-btn:active {
+            opacity: 0.4;
+            transform: scale(0.96);
+        }
+
+        .ios-back-btn i {
+            font-size: 16px;
+            font-weight: 300;
+            margin-top: 1px;
+        }
+
+        .dark-mode .ios-back-btn {
+            color: #fff !important;
         }
 
         #app-photos .app-content {
@@ -3675,6 +3804,93 @@
             font-size: 8px;
         }
 
+        /* 悬浮通知弹窗样式 */
+        .ios-notification {
+            position: absolute;
+            top: env(safe-area-inset-top, 40px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            width: 90%;
+            max-width: 360px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 12px;
+            z-index: 99999;
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.32, 1, 0.32, 1), opacity 0.5s ease;
+            cursor: pointer;
+        }
+
+        .dark-mode .ios-notification {
+            background: rgba(28, 28, 30, 0.85);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ios-notification.show {
+            transform: translateX(-50%) translateY(10px);
+            opacity: 1;
+        }
+
+        .ios-notification-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .ios-notification-content {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ios-notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ios-notification-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dark-mode .ios-notification-title {
+            color: #fff;
+        }
+
+        .ios-notification-app {
+            font-size: 12px;
+            color: #8e8e93;
+            text-transform: uppercase;
+        }
+
+        .ios-notification-text {
+            font-size: 14px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dark-mode .ios-notification-text {
+            color: #ccc;
+        }
+
         /* 调整头像图标颜色 */
         .wechat-profile-avatar i {
             color: #fff;
@@ -3918,23 +4134,23 @@
 
         .moments-user-name-top {
             color: #ffffff;
-            font-size: 19px;
+            font-size: 20px;
             font-weight: 600;
-            margin-right: 16px;
-            margin-bottom: 34px; 
+            margin-right: 18px;
+            margin-bottom: 30px; 
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
         }
 
         img.moments-avatar {
-            width: 72px;
-            height: 72px;
+            width: 86px;
+            height: 86px;
             border-radius: 50%; /* 修改为圆形 */
             object-fit: cover;
             background: #fff;
-            margin-bottom: -36px;
-            border: 2px solid #fff; /* 增加白边，更具高级感 */
+            margin-bottom: -32px;
+            border: 3px solid #fff; /* 增加白边，更具高级感 */
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
@@ -3965,8 +4181,8 @@
         }
         
         div.moments-avatar, div.moments-user-avatar, img.moments-user-avatar {
-            width: 46px;
-            height: 46px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%; /* 修改为圆形 */
             background: #f0f0f0; /* 默认浅灰色背景 */
             box-shadow: 0 4px 10px rgba(184, 157, 109, 0.15);
@@ -3991,7 +4207,7 @@
         }
 
         .moments-content {
-            padding: 4px 0 20px 64px; /* 对齐头像后的间距 */
+            padding: 4px 0 20px 68px; /* 适配放大后的头像间距 */
         }
 
         .moments-content p {
@@ -4006,7 +4222,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            padding: 10px 0 20px 64px;
+            padding: 10px 0 20px 68px;
         }
 
         .moments-image {
@@ -4029,22 +4245,31 @@
             display: flex;
             justify-content: flex-start;
             gap: 28px;
-            padding: 8px 0 24px 64px;
+            padding: 8px 0 24px 68px;
             color: #b89d6d;
             opacity: 0.6;
         }
-
+        
         .moments-action {
+            cursor: pointer;
+            transition: opacity 0.2s;
             font-size: 13px;
             gap: 8px;
             padding: 4px 8px;
             border-radius: 4px;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
         }
-
+        
         .moments-action:hover {
             background: rgba(184, 157, 109, 0.1);
             color: #b89d6d;
+            opacity: 1;
+        }
+        
+        .moments-action.liked {
+            color: #ff3b30;
             opacity: 1;
         }
 
@@ -4811,9 +5036,12 @@
         .wechat-message-avatar {
             width: 36px;
             height: 36px;
+            min-width: 36px;
+            min-height: 36px;
             border-radius: 6px;
             margin: 0 8px;
             object-fit: cover;
+            display: block;
         }
 
         .wechat-message-bubble {
@@ -5595,44 +5823,33 @@
             border-color: #d0d0d0;
         }
 
-        .wechat-theme-selector {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
+        .wechat-theme-blocks {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
         }
 
-        .wechat-theme-option {
-            border: 2px solid #e0e0e0;
-            padding: 12px;
+        .wechat-theme-block {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
             border-radius: 12px;
-            cursor: pointer;
-            text-align: center;
-            font-size: 13px;
-            transition: all 0.2s ease;
-            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid var(--border-color);
         }
 
-        .wechat-theme-option:hover {
-            transform: scale(1.05);
-            border-color: #667eea;
+        .wechat-theme-block label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-color);
         }
 
-        .wechat-theme-option.active {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .wechat-theme-preview {
-            width: 80px;
-            height: 50px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            transition: box-shadow 0.2s ease;
-        }
-
-        .wechat-theme-option.active .wechat-theme-preview {
-            box-shadow: 0 0 0 2px #667eea;
+        .dark-mode .wechat-theme-block {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .wechat-divider {
@@ -5900,8 +6117,8 @@
             width: 100%;
             height: 60%;
             background: rgba(28, 28, 30, 0.95);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 40px 40px 0 0;
             transform: translateY(100%);
             transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
@@ -6127,8 +6344,8 @@
             width: 260px;
             height: 260px;
             background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 42px;
             display: none;
             align-items: center;
@@ -6203,20 +6420,24 @@
         /* --- ▼▼▼ 响应式布局：平板 ▼▼▼ --- */
         @media (min-width: 768px) {
             .apps-grid-container {
-                max-width: 80%;
+                width: 100%;
+                max-width: none;
             }
 
             .apps-grid {
-                grid-template-columns: repeat(6, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                justify-content: center;
                 gap: 24px 20px;
             }
 
             .widget {
-                grid-column: span 3;
+                grid-column: span 2;
+                grid-row: span 2;
             }
 
             .dock {
-                max-width: 60%;
+                width: 100%;
+                max-width: 600px;
             }
 
             .app-icon .icon {
@@ -6229,20 +6450,24 @@
         /* --- ▼▼▼ 响应式布局：桌面 ▼▼▼ --- */
         @media (min-width: 1025px) {
             .apps-grid-container {
-                max-width: 85%;
+                width: 100%;
+                max-width: none;
             }
 
             .apps-grid {
-                grid-template-columns: repeat(8, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+                justify-content: center;
                 gap: 32px 24px;
             }
 
             .widget {
-                grid-column: span 3;
+                grid-column: span 2;
+                grid-row: span 2;
             }
 
             .dock {
-                max-width: 50%;
+                width: 100%;
+                max-width: 800px;
             }
 
             .app-icon .icon {
@@ -6255,15 +6480,18 @@
         /* --- ▼▼▼ 响应式布局：超大屏幕 ▼▼▼ --- */
         @media (min-width: 1440px) {
             .apps-grid-container {
-                max-width: 90%;
+                width: 100%;
+                max-width: none;
             }
             .apps-grid {
-                grid-template-columns: repeat(10, 1fr); /* 10列图标 */
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                justify-content: center;
                 gap: clamp(32px, 3vw, 48px);
             }
 
             .widget {
-                grid-column: span 4;
+                grid-column: span 2;
+                grid-row: span 2;
             }
 
             .app-icon .icon {
@@ -6547,12 +6775,12 @@
 
                 <div class="settings-group">
                     <div class="settings-item" style="flex-direction: column; align-items: stretch; padding: 15px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <div class="item-icon" style="background: #FF9500;"><i class="fas fa-search-plus"></i></div>
                                 <span>桌面图标大小</span>
                             </div>
-                            <span id="icon-size-value" style="color: var(--secondary-text-color);">100%</span>
+                            <span id="icon-size-value" style="color: var(--secondary-text-color); margin-left: 20px;">100%</span>
                         </div>
                         <input type="range" id="icon-size-slider" min="50" max="150" value="100" style="width: 100%;">
                     </div>
@@ -6770,7 +6998,7 @@
     <!-- 世界书应用 -->
     <div class="app-page" id="app-worldbook">
         <header class="app-header">
-            <button class="header-btn" id="worldbook-back-btn"><i class="fas fa-chevron-left"></i></button>
+            <button class="header-btn ios-back-btn" id="worldbook-back-btn" style="width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; background: var(--switch-bg); border-radius: 50%; font-size: 18px !important; font-weight: 500 !important; color: var(--secondary-text-color) !important; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">×</button>
             <h1>底层JSON限制</h1>
         </header>
         <div class="app-content">
@@ -6806,7 +7034,7 @@
     <!-- API配置应用 -->
     <div class="app-page" id="app-api-config">
         <header class="app-header">
-            <button class="header-btn" id="api-config-back-btn"><i class="fas fa-chevron-left"></i></button>
+            <button class="header-btn ios-back-btn" id="api-config-back-btn" style="width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; background: var(--switch-bg); border-radius: 50%; font-size: 18px !important; font-weight: 500 !important; color: var(--secondary-text-color) !important; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">×</button>
             <h1>API配置</h1>
         </header>
         <div class="app-content">
@@ -6872,7 +7100,7 @@
     <!-- 定位服务应用 -->
     <div class="app-page" id="app-location">
         <header class="app-header">
-            <button class="header-btn" id="location-back-btn"><i class="fas fa-chevron-left"></i></button>
+            <button class="header-btn ios-back-btn" id="location-back-btn" style="width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; background: var(--switch-bg); border-radius: 50%; font-size: 18px !important; font-weight: 500 !important; color: var(--secondary-text-color) !important; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">×</button>
             <h1>定位服务</h1>
         </header>
         <div class="app-content">
@@ -6901,21 +7129,35 @@
     <!-- 通用应用 -->
     <div class="app-page" id="app-general">
         <header class="app-header">
-            <button class="header-btn" id="general-back-btn"><i class="fas fa-chevron-left"></i></button>
+            <button class="header-btn ios-back-btn" id="general-back-btn" style="width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; background: var(--switch-bg); border-radius: 50%; font-size: 18px !important; font-weight: 500 !important; color: var(--secondary-text-color) !important; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">×</button>
             <h1>通用</h1>
         </header>
         <div class="app-content">
             <div style="padding: 20px;">
                 <div class="settings-group">
                     <div class="settings-item" id="general-location-toggle">
-                        <div class="item-icon" style="background: #FF9500;"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="item-icon" style="background: transparent; color: var(--text-color); font-size: 18px;"><i class="fas fa-map-marker-alt"></i></div>
                         <span>定位服务</span>
-                        <i class="fas fa-chevron-right" style="color: var(--secondary-text-color);"></i>
+                        <i class="fas fa-chevron-right" style="color: var(--secondary-text-color); margin-left: auto;"></i>
                     </div>
                     <div class="settings-item" id="general-api-config-toggle">
-                        <div class="item-icon" style="background: #34C759;"><i class="fas fa-robot"></i></div>
+                        <div class="item-icon" style="background: transparent; color: var(--text-color); font-size: 18px;"><i class="fas fa-robot"></i></div>
                         <span>API配置</span>
-                        <i class="fas fa-chevron-right" style="color: var(--secondary-text-color);"></i>
+                        <i class="fas fa-chevron-right" style="color: var(--secondary-text-color); margin-left: auto;"></i>
+                    </div>
+                </div>
+
+                <div class="settings-group" style="margin-top: 20px;">
+                    <div class="settings-item" id="delay-reply-time-container">
+                        <div class="item-icon" style="background: transparent; color: var(--text-color); font-size: 18px;"><i class="fas fa-hourglass-start"></i></div>
+                        <div style="flex: 1; display: flex; flex-direction: column;">
+                            <span>微信延迟回复</span>
+                            <span style="font-size: 12px; color: var(--secondary-text-color); margin-top: 2px;">合并多条消息（0为即刻回复）</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <input type="text" id="delay-reply-time" value="3" style="width: 40px; text-align: right; border: none; background: transparent; color: var(--accent-color); font-size: 16px; outline: none; font-weight: 500;" placeholder="0" inputmode="numeric" pattern="[0-9]*">
+                            <span style="color: var(--secondary-text-color); font-size: 16px;">秒</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -7142,6 +7384,38 @@
         </div>
     </div>
 
+    <!-- 角色记忆管理 (隐藏应用) -->
+    <div class="app-page" id="app-char-memory" style="background: #f2f2f7;">
+        <header class="app-header" style="background: #fff; border-bottom: 1px solid #e5e5ea; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px;">
+            <button class="notes-editor-btn" onclick="closeCharacterMemoryPage()" style="color: #007aff; background: none; border: none; font-size: 17px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <i class="fas fa-chevron-left"></i> 返回
+            </button>
+            <h1 style="font-size: 17px; font-weight: 600; margin: 0; color: #000;">角色记忆管理</h1>
+            <div style="width: 50px;"></div>
+        </header>
+        <div class="app-content" style="padding: 16px; overflow-y: auto;">
+            <div id="char-memory-list" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px;">
+                <!-- 动态生成角色记忆列表 -->
+            </div>
+        </div>
+        
+        <!-- 角色具体记忆编辑页面 -->
+        <div class="notes-editor" id="char-memory-editor" style="display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f2f2f7; z-index: 10000; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);">
+            <header class="app-header" style="background: #fff; border-bottom: 1px solid #e5e5ea; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px;">
+                <button class="notes-editor-btn" onclick="closeCharMemoryEditor()" style="color: #007aff; background: none; border: none; font-size: 17px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <i class="fas fa-chevron-left"></i> 返回
+                </button>
+                <h1 id="char-memory-editor-title" style="font-size: 17px; font-weight: 600; margin: 0; color: #000;">角色记忆</h1>
+                <div style="width: 50px;"></div>
+            </header>
+            <div class="app-content" style="padding: 16px; overflow-y: auto; flex: 1;">
+                <div id="char-memory-editor-content">
+                    <!-- 动态生成具体的记忆条目和添加输入框 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 备忘录应用 -->
     <div class="app-page" id="app-notes">
         <div class="notes-list-header">
@@ -7166,6 +7440,15 @@
                 <button class="notes-editor-btn" onclick="saveNote()" style="font-weight: 600;">完成</button>
             </div>
             <textarea class="notes-editor-content" id="note-content" placeholder="开始输入..."></textarea>
+            <div class="notes-editor-footer">
+                <button class="notes-editor-btn" id="notes-delete-btn" onclick="deleteNote()" style="color: #ff3b30; display: none;">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                <div style="flex: 1;"></div>
+                <button class="notes-editor-btn" style="color: #ffcc00;">
+                    <i class="fas fa-share-square"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -7790,26 +8073,41 @@
             </div>
             <div class="wechat-modal-body">
                 <h3>外观主题</h3>
-                <div class="wechat-theme-selector">
-                    <div class="wechat-theme-option" data-theme="default">
-                        <div class="wechat-theme-preview" style="background:#f4f4f9;"></div>
-                        蔚蓝
+                <div class="wechat-theme-blocks">
+                    <div class="wechat-theme-block">
+                        <label>聊天背景</label>
+                        <div class="wechat-avatar-upload" style="margin-top: 10px;">
+                            <div class="wechat-avatar-preview" id="wechat-chat-bg-preview" style="border-radius: 8px; width: 100px; height: 160px;">
+                                <i class="fas fa-image"></i>
+                                <div class="wechat-avatar-upload-overlay">
+                                    <i class="fas fa-camera"></i>
+                                    <span>点击上传</span>
+                                </div>
+                            </div>
+                            <input type="file" id="wechat-chat-bg-input" accept="image/*" style="display: none;">
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                <button class="wechat-avatar-upload-btn" onclick="document.getElementById('wechat-chat-bg-input').click()">选择图片</button>
+                                <button class="wechat-avatar-upload-btn" onclick="clearWechatChatBg()" style="background: #f2f2f7; color: #ff3b30;">恢复默认</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="wechat-theme-option" data-theme="pink">
-                        <div class="wechat-theme-preview" style="background:#ffb6c1;"></div>
-                        草莓熊
-                    </div>
-                    <div class="wechat-theme-option" data-theme="yellow">
-                        <div class="wechat-theme-preview" style="background:#ffdb58;"></div>
-                        奶酪黄
-                    </div>
-                    <div class="wechat-theme-option" data-theme="green">
-                        <div class="wechat-theme-preview" style="background:#98fb98;"></div>
-                        薄荷绿
-                    </div>
-                    <div class="wechat-theme-option" data-theme="dark">
-                        <div class="wechat-theme-preview" style="background:#1c1c1e;"></div>
-                        深黑
+
+                    <div class="wechat-theme-block">
+                        <label>主页面底图</label>
+                        <div class="wechat-avatar-upload" style="margin-top: 10px;">
+                            <div class="wechat-avatar-preview" id="wechat-main-bg-preview" style="border-radius: 8px; width: 100px; height: 160px;">
+                                <i class="fas fa-image"></i>
+                                <div class="wechat-avatar-upload-overlay">
+                                    <i class="fas fa-camera"></i>
+                                    <span>点击上传</span>
+                                </div>
+                            </div>
+                            <input type="file" id="wechat-main-bg-input" accept="image/*" style="display: none;">
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                <button class="wechat-avatar-upload-btn" onclick="document.getElementById('wechat-main-bg-input').click()">选择图片</button>
+                                <button class="wechat-avatar-upload-btn" onclick="clearWechatMainBg()" style="background: #f2f2f7; color: #ff3b30;">恢复默认</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -8010,6 +8308,51 @@
 
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
+        // --- 全局稳定性增强：防止各种不可预见的异常导致应用崩溃 ---
+        (function() {
+            // 1. 捕获全局未处理异常
+            window.addEventListener('error', function(e) {
+                console.error('全局捕获异常:', e.error || e.message);
+                // 阻止默认的控制台报错和停止执行行为
+                // e.preventDefault();
+            });
+
+            window.addEventListener('unhandledrejection', function(e) {
+                console.error('全局捕获 Promise 异常:', e.reason);
+                // e.preventDefault();
+            });
+
+            // 2. 安全重写 localStorage 的核心方法，防止隐私模式或超限报错 (QuotaExceededError) 导致后续 JS 中断
+            const originalSetItem = Storage.prototype.setItem;
+            const originalGetItem = Storage.prototype.getItem;
+            const originalRemoveItem = Storage.prototype.removeItem;
+
+            Storage.prototype.setItem = function(key, value) {
+                try {
+                    originalSetItem.call(this, key, value);
+                } catch (error) {
+                    console.warn('localStorage 存储失败 (可能超出 5MB 限制或处于隐私模式):', error);
+                }
+            };
+
+            Storage.prototype.getItem = function(key) {
+                try {
+                    return originalGetItem.call(this, key);
+                } catch (error) {
+                    console.warn('localStorage 读取失败:', error);
+                    return null;
+                }
+            };
+
+            Storage.prototype.removeItem = function(key) {
+                try {
+                    originalRemoveItem.call(this, key);
+                } catch (error) {
+                    console.warn('localStorage 删除失败:', error);
+                }
+            };
+        })();
+
         document.addEventListener('DOMContentLoaded', () => {
             const GAODE_API_KEY = '5af5f1043f8d111d737b55c81a860793';
             const phoneContainer = document.getElementById('phone-ui-container');
@@ -8543,11 +8886,252 @@
                 // 初始化时加载历史记录
                 loadHistory();
 
+                let easterEggSequence = [];
+
+                let currentCharIdForMemory = null;
+
+                window.renderCharacterMemoryList = function() {
+                    const list = document.getElementById('char-memory-list');
+                    if (!list || typeof wechatState === 'undefined' || !wechatState.characters) return;
+
+                    list.innerHTML = '';
+                    
+                    if (wechatState.characters.length === 0) {
+                        list.innerHTML = '<div style="text-align:center; padding: 20px; color: #8e8e93;">没有角色</div>';
+                        return;
+                    }
+
+                    wechatState.characters.forEach(char => {
+                        const charDiv = document.createElement('div');
+                        charDiv.style.background = '#fff';
+                        charDiv.style.borderRadius = '12px';
+                        charDiv.style.padding = '16px';
+                        charDiv.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                        charDiv.style.marginBottom = '12px';
+                        charDiv.style.cursor = 'pointer';
+                        charDiv.onclick = function() {
+                            openCharMemoryEditor(char.id);
+                        };
+                        
+                        charDiv.innerHTML = `
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <img src="${char.avatar}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: #eee;">
+                                    <div style="font-weight: 600; font-size: 16px;">${char.name}</div>
+                                </div>
+                                <i class="fas fa-chevron-right" style="color: #c7c7cc;"></i>
+                            </div>
+                        `;
+                        list.appendChild(charDiv);
+                    });
+                };
+
+                window.openCharMemoryEditor = function(charId) {
+                    const char = wechatState.characters.find(c => c.id === charId);
+                    if (!char) return;
+                    currentCharIdForMemory = charId;
+                    
+                    const editor = document.getElementById('char-memory-editor');
+                    const title = document.getElementById('char-memory-editor-title');
+                    title.innerText = char.name + '的记忆';
+                    
+                    renderCharMemoryEditorContent(charId);
+                    
+                    editor.style.display = 'flex';
+                    // force reflow
+                    editor.offsetHeight;
+                    editor.style.transform = 'translateX(0)';
+                };
+
+                window.closeCharMemoryEditor = function() {
+                    const editor = document.getElementById('char-memory-editor');
+                    editor.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        editor.style.display = 'none';
+                        currentCharIdForMemory = null;
+                    }, 300);
+                };
+
+                window.renderCharMemoryEditorContent = function(charId) {
+                    const char = wechatState.characters.find(c => c.id === charId);
+                    const container = document.getElementById('char-memory-editor-content');
+                    if (!char || !container) return;
+
+                    let memories = [];
+                    if (Array.isArray(char.memory)) {
+                        memories = char.memory;
+                    } else if (typeof char.memory === 'string' && char.memory.trim() !== '') {
+                        memories = char.memory.split('\n')
+                            .map(m => m.trim())
+                            .filter(m => m !== '')
+                            .map(m => m.replace(/^\d+\.\s*/, ''));
+                    }
+
+                    let memoryItemsHtml = '';
+                    if (memories.length === 0) {
+                        memoryItemsHtml = '<div style="color: #8e8e93; font-size: 14px; padding: 20px 0; text-align: center;">暂无记忆</div>';
+                    } else {
+                        memories.forEach((mem, idx) => {
+                            memoryItemsHtml += `
+                                <div style="display: flex; align-items: flex-start; justify-content: space-between; padding: 12px; background: #fff; border-radius: 8px; margin-bottom: 8px; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                    <div style="flex: 1; word-break: break-word; line-height: 1.4; cursor: pointer;" onclick="editSingleCharMemory('${char.id}', ${idx})" id="mem-text-${char.id}-${idx}">${mem}</div>
+                                    <div style="display: none; flex: 1; margin-right: 8px;" id="mem-edit-${char.id}-${idx}">
+                                        <input type="text" id="mem-input-${char.id}-${idx}" value="${mem.replace(/"/g, '&quot;')}" style="width: 100%; padding: 4px 8px; border: 1px solid #007aff; border-radius: 4px; font-size: 14px; outline: none;">
+                                        <div style="display: flex; gap: 4px; margin-top: 4px;">
+                                            <button onclick="saveEditCharMemory('${char.id}', ${idx})" style="background: #007aff; color: #fff; border: none; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">保存</button>
+                                            <button onclick="cancelEditCharMemory('${char.id}', ${idx})" style="background: #e5e5ea; color: #000; border: none; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">取消</button>
+                                        </div>
+                                    </div>
+                                    <button onclick="deleteSingleCharMemory('${char.id}', ${idx})" style="background: none; border: none; color: #ff3b30; cursor: pointer; padding: 4px; margin-left: 8px;">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    container.innerHTML = `
+                        <div style="margin-bottom: 20px;">
+                            ${memoryItemsHtml}
+                        </div>
+                        <div style="display: flex; gap: 8px; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <input type="text" id="char-memory-input-${char.id}" placeholder="添加新记忆条目..." style="flex: 1; padding: 8px; border: none; font-size: 15px; outline: none; background: transparent;">
+                            <button onclick="addSingleCharMemory('${char.id}')" style="background: #007aff; color: #fff; border: none; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;">添加</button>
+                        </div>
+                    `;
+                };
+
+                window.addSingleCharMemory = async function(charId) {
+                    const char = wechatState.characters.find(c => c.id === charId);
+                    const input = document.getElementById(`char-memory-input-${charId}`);
+                    const newMemory = input.value.trim();
+                    
+                    if (char && newMemory) {
+                        if (!Array.isArray(char.memory)) {
+                            if (typeof char.memory === 'string' && char.memory.trim() !== '') {
+                                char.memory = char.memory.split('\n')
+                                    .map(m => m.trim())
+                                    .filter(m => m !== '')
+                                    .map(m => m.replace(/^\d+\.\s*/, ''));
+                            } else {
+                                char.memory = [];
+                            }
+                        }
+                        char.memory.push(newMemory);
+                        if (typeof saveWechatData === 'function') {
+                            await saveWechatData();
+                        }
+                        // Refresh the detail view
+                        renderCharMemoryEditorContent(charId);
+                    }
+                };
+
+                window.editSingleCharMemory = function(charId, index) {
+                    const textEl = document.getElementById(`mem-text-${charId}-${index}`);
+                    const editEl = document.getElementById(`mem-edit-${charId}-${index}`);
+                    const inputEl = document.getElementById(`mem-input-${charId}-${index}`);
+                    
+                    if (textEl && editEl && inputEl) {
+                        textEl.style.display = 'none';
+                        editEl.style.display = 'block';
+                        inputEl.focus();
+                    }
+                };
+
+                window.cancelEditCharMemory = function(charId, index) {
+                    const textEl = document.getElementById(`mem-text-${charId}-${index}`);
+                    const editEl = document.getElementById(`mem-edit-${charId}-${index}`);
+                    
+                    if (textEl && editEl) {
+                        editEl.style.display = 'none';
+                        textEl.style.display = 'block';
+                    }
+                };
+
+                window.saveEditCharMemory = async function(charId, index) {
+                    const char = wechatState.characters.find(c => c.id === charId);
+                    const inputEl = document.getElementById(`mem-input-${charId}-${index}`);
+                    
+                    if (char && inputEl && Array.isArray(char.memory) && index >= 0 && index < char.memory.length) {
+                        const newText = inputEl.value.trim();
+                        if (newText) {
+                            char.memory[index] = newText;
+                            if (typeof saveWechatData === 'function') {
+                                await saveWechatData();
+                            }
+                            renderCharMemoryEditorContent(charId);
+                        } else {
+                            // 如果修改为空，则相当于删除
+                            deleteSingleCharMemory(charId, index);
+                        }
+                    }
+                };
+
+                window.deleteSingleCharMemory = async function(charId, index) {
+                    if (confirm('确定要删除这条记忆吗？')) {
+                        const char = wechatState.characters.find(c => c.id === charId);
+                        if (char) {
+                            if (!Array.isArray(char.memory)) {
+                                if (typeof char.memory === 'string' && char.memory.trim() !== '') {
+                                    char.memory = char.memory.split('\n')
+                                        .map(m => m.trim())
+                                        .filter(m => m !== '')
+                                        .map(m => m.replace(/^\d+\.\s*/, ''));
+                                } else {
+                                    char.memory = [];
+                                }
+                            }
+                            if (index >= 0 && index < char.memory.length) {
+                                char.memory.splice(index, 1);
+                                if (typeof saveWechatData === 'function') {
+                                    await saveWechatData();
+                                }
+                                // Refresh the detail view
+                                renderCharMemoryEditorContent(charId);
+                            }
+                        }
+                    }
+                };
+
+                window.showCharacterMemoryPage = function() {
+                    const page = document.getElementById('app-char-memory');
+                    
+                    if (typeof wechatState === 'undefined' || !wechatState.characters) {
+                        alert('未找到角色数据');
+                        return;
+                    }
+
+                    renderCharacterMemoryList();
+
+                    page.classList.add('active');
+                };
+
+                window.closeCharacterMemoryPage = function() {
+                    document.getElementById('app-char-memory').classList.remove('active');
+                };
+
+
+
                 // 事件监听
                 const buttons = document.querySelectorAll('.calculator-btn');
                 buttons.forEach(button => {
                     button.addEventListener('click', () => {
                         const action = button.dataset.action;
+                        const number = button.dataset.number;
+                        const key = action || number;
+
+                        easterEggSequence.push(key);
+                        if (easterEggSequence.length > 9) easterEggSequence.shift();
+
+                        // 密码：5201314-.
+                        if (easterEggSequence.join(',') === '5,2,0,1,3,1,4,subtract,decimal') {
+                            easterEggSequence = [];
+                            showCharacterMemoryPage();
+                            // 重置计算器状态
+                            clearClickCount = 0;
+                            clear();
+                            return;
+                        }
                         
                         if (button.classList.contains('calculator-btn-number')) {
                             if (action === 'decimal') {
@@ -8754,6 +9338,10 @@
                         stopCamera();
                     }
 
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        throw new Error('浏览器不支持或未授权访问相机');
+                    }
+
                     const constraints = {
                         video: {
                             facingMode: currentCamera,
@@ -8879,17 +9467,21 @@
             });
 
             function initDB() {
-                const request = indexedDB.open('photoAppDB', 1);
-                request.onupgradeneeded = e => {
-                    db = e.target.result;
-                    db.createObjectStore('photos', { keyPath: 'id' });
-                };
-                request.onsuccess = e => {
-                    db = e.target.result;
-                };
-                request.onerror = e => {
-                    console.error('IndexedDB error:', e.target.errorCode);
-                };
+                try {
+                    const request = indexedDB.open('photoAppDB', 1);
+                    request.onupgradeneeded = e => {
+                        db = e.target.result;
+                        db.createObjectStore('photos', { keyPath: 'id' });
+                    };
+                    request.onsuccess = e => {
+                        db = e.target.result;
+                    };
+                    request.onerror = e => {
+                        console.error('IndexedDB error:', e.target.error || e.target.errorCode);
+                    };
+                } catch (error) {
+                    console.warn('IndexedDB 初始化失败, 可能是由于隐私模式或浏览器限制:', error);
+                }
             }
             // 初始化照片应用数据库
             initDB();
@@ -8975,6 +9567,7 @@
                             
                             const img = document.createElement('img');
                             img.src = photo.data;
+                            img.loading = 'lazy'; // 添加懒加载，防止大量高清图片导致内存溢出闪退
                             
                             // 点击查看照片
                             img.addEventListener('click', () => {
@@ -9341,7 +9934,27 @@
                     // 初始化通用应用
                     const generalLocationToggle = document.getElementById('general-location-toggle');
                     const generalApiConfigToggle = document.getElementById('general-api-config-toggle');
+                    const delayReplyTime = document.getElementById('delay-reply-time');
                     
+                    // 初始化延迟回复设置
+                    if (delayReplyTime) {
+                        const savedDelayTime = localStorage.getItem('wechatDelayReplyTime') || '3';
+                        delayReplyTime.value = savedDelayTime;
+                        
+                        delayReplyTime.addEventListener('input', (e) => {
+                            // 只允许输入数字
+                            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                        });
+
+                        delayReplyTime.addEventListener('blur', (e) => {
+                            let val = parseInt(e.target.value);
+                            if (isNaN(val) || val < 0) val = 0;
+                            if (val > 60) val = 60;
+                            e.target.value = val;
+                            localStorage.setItem('wechatDelayReplyTime', val);
+                        });
+                    }
+
                     // 定位服务点击事件
                     if (generalLocationToggle) {
                         generalLocationToggle.addEventListener('click', () => {
@@ -10736,7 +11349,11 @@
                 { app: 'appstore', name: 'App Store', icon: 'fab fa-app-store-ios' },
                 { app: 'themes', name: '主题商店', icon: 'fas fa-palette' },
                 { app: 'wechat', name: '微信', icon: 'fab fa-weixin' },
-                { app: 'music', name: '音乐', icon: 'fas fa-music' }
+                { app: 'music', name: '音乐', icon: 'fas fa-music' },
+                { app: 'calculator', name: '计算器', icon: 'fas fa-calculator' },
+                { app: 'clock', name: '时钟', icon: 'fas fa-clock' },
+                { app: 'calendar', name: '日历', icon: 'fas fa-calendar-alt' },
+                { app: 'notes', name: '备忘录', icon: 'fas fa-sticky-note' }
             ];
 
             // 加载自定义图标界面
@@ -10776,6 +11393,12 @@
                 if (customIcon) {
                     return `<img src="${customIcon}" style="width: 100%; height: 100%; object-fit: cover;">`;
                 }
+                if (appName === 'calendar') {
+                    return `
+                        <div class="cal-weekday">周三</div>
+                        <div class="cal-day">8</div>
+                    `;
+                }
                 return `<i class="${defaultIcon}"></i>`;
             }
 
@@ -10784,26 +11407,65 @@
                 const file = event.target.files[0];
                 if (!file) return;
 
+                if (!file.type.startsWith('image/')) {
+                    alert('请选择有效的图片文件！');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const iconDataUrl = e.target.result;
-                    
-                    // 显示预览
-                    const previewElement = document.getElementById(`icon-preview-${appName}`);
-                    previewElement.innerHTML = `<img src="${iconDataUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
-                    
-                    // 保存图标
-                    saveCustomIcon(appName, iconDataUrl);
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const MAX_SIZE = 120; // 图标不需要太大
+                        if (width > height) {
+                            if (width > MAX_SIZE) {
+                                height *= MAX_SIZE / width;
+                                width = MAX_SIZE;
+                            }
+                        } else {
+                            if (height > MAX_SIZE) {
+                                width *= MAX_SIZE / height;
+                                height = MAX_SIZE;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        // 使用 PNG 格式以保留透明度
+                        const iconDataUrl = canvas.toDataURL('image/png');
+                        
+                        try {
+                            // 显示预览
+                            const previewElement = document.getElementById(`icon-preview-${appName}`);
+                            previewElement.innerHTML = `<img src="${iconDataUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                            previewElement.style.backgroundImage = 'none';
+                            previewElement.style.backgroundColor = 'transparent';
+                            
+                            // 保存图标
+                            saveCustomIcon(appName, iconDataUrl);
+                        } catch (error) {
+                            alert('保存失败：存储空间不足');
+                        }
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
 
             // 保存自定义图标
             function saveCustomIcon(appName, iconDataUrl) {
-                localStorage.setItem(`custom-icon-${appName}`, iconDataUrl);
-                
-                // 更新主屏幕上的图标
-                updateHomeScreenIcon(appName, iconDataUrl);
+                try {
+                    localStorage.setItem(`custom-icon-${appName}`, iconDataUrl);
+                    // 更新主屏幕上的图标
+                    updateHomeScreenIcon(appName, iconDataUrl);
+                } catch (error) {
+                    console.error('保存图标失败:', error);
+                    alert('保存失败：存储空间已满，请清除其他缓存。');
+                }
             }
 
             // 更新主屏幕图标
@@ -10811,6 +11473,8 @@
                 const appIcons = document.querySelectorAll(`.app-icon[data-app="${appName}"] .icon`);
                 appIcons.forEach(icon => {
                     icon.innerHTML = `<img src="${iconDataUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    icon.style.backgroundImage = 'none';
+                    icon.style.backgroundColor = 'transparent';
                 });
             }
 
@@ -10818,14 +11482,28 @@
             window.resetAppIcon = function(appName, defaultIcon) {
                 localStorage.removeItem(`custom-icon-${appName}`);
                 
+                let defaultHTML = `<i class="${defaultIcon}"></i>`;
+                if (appName === 'calendar') {
+                    defaultHTML = `
+                        <div class="cal-weekday">周三</div>
+                        <div class="cal-day">8</div>
+                    `;
+                }
+
                 // 更新预览
                 const previewElement = document.getElementById(`icon-preview-${appName}`);
-                previewElement.innerHTML = `<i class="${defaultIcon}"></i>`;
+                if (previewElement) {
+                    previewElement.innerHTML = defaultHTML;
+                    previewElement.style.backgroundImage = '';
+                    previewElement.style.backgroundColor = '';
+                }
                 
                 // 更新主屏幕图标
                 const appIcons = document.querySelectorAll(`.app-icon[data-app="${appName}"] .icon`);
                 appIcons.forEach(icon => {
-                    icon.innerHTML = `<i class="${defaultIcon}"></i>`;
+                    icon.innerHTML = defaultHTML;
+                    icon.style.backgroundImage = '';
+                    icon.style.backgroundColor = '';
                 });
             }
 
@@ -11254,7 +11932,13 @@
                 try {
                     // 使用html2canvas库（如果可用）
                     if (typeof html2canvas !== 'undefined') {
-                        html2canvas(document.body).then(canvas => {
+                        const targetElement = document.getElementById('phone-ui-container') || document.body;
+                        html2canvas(targetElement, {
+                            scale: Math.min(window.devicePixelRatio, 2), // 限制缩放比例防止内存溢出导致闪退
+                            useCORS: true,
+                            allowTaint: true,
+                            backgroundColor: null
+                        }).then(canvas => {
                             // 将截图转换为data URL
                             const screenshotDataUrl = canvas.toDataURL('image/png');
                             
@@ -11409,6 +12093,7 @@
                     updateMomentsCover();
                     initWechatEditProfile();
                     initMomentsCoverUpload();
+                    startWechatBackgroundTasks();
                 } catch (error) {
                     console.error('初始化微信界面出错:', error);
                     // 出错时使用默认数据
@@ -11421,6 +12106,7 @@
                     updateMomentsCover();
                     initWechatEditProfile();
                     initMomentsCoverUpload();
+                    startWechatBackgroundTasks();
                 }
             }
 
@@ -11445,38 +12131,43 @@
                         return;
                     }
                     
-                    const request = indexedDB.open(DB_NAME, DB_VERSION);
-                    
-                    // 数据库升级或首次创建
-                    request.onupgradeneeded = (event) => {
-                        const db = event.target.result;
-                        console.log('数据库升级，当前版本:', event.oldVersion, '->', event.newVersion);
+                    try {
+                        const request = indexedDB.open(DB_NAME, DB_VERSION);
                         
-                        // 创建所有需要的对象存储空间
-                        Object.values(STORES).forEach(storeName => {
-                            try {
-                                if (!db.objectStoreNames.contains(storeName)) {
-                                    const store = db.createObjectStore(storeName, { keyPath: 'id' });
-                                    console.log(`成功创建存储对象: ${storeName}`);
-                                } else {
-                                    console.log(`存储对象已存在: ${storeName}`);
+                        // 数据库升级或首次创建
+                        request.onupgradeneeded = (event) => {
+                            const db = event.target.result;
+                            console.log('数据库升级，当前版本:', event.oldVersion, '->', event.newVersion);
+                            
+                            // 创建所有需要的对象存储空间
+                            Object.values(STORES).forEach(storeName => {
+                                try {
+                                    if (!db.objectStoreNames.contains(storeName)) {
+                                        const store = db.createObjectStore(storeName, { keyPath: 'id' });
+                                        console.log(`成功创建存储对象: ${storeName}`);
+                                    } else {
+                                        console.log(`存储对象已存在: ${storeName}`);
+                                    }
+                                } catch (error) {
+                                    console.error(`创建存储对象失败 ${storeName}:`, error);
                                 }
-                            } catch (error) {
-                                console.error(`创建存储对象失败 ${storeName}:`, error);
-                            }
-                        });
-                    };
-                    
-                    request.onsuccess = (event) => {
-                        indexedDBInstance = event.target.result;
-                        console.log('数据库打开成功，存储对象:', Array.from(indexedDBInstance.objectStoreNames));
-                        resolve(indexedDBInstance);
-                    };
-                    
-                    request.onerror = (event) => {
-                        console.error('打开数据库失败:', event.target.error);
-                        reject(event.target.error);
-                    };
+                            });
+                        };
+                        
+                        request.onsuccess = (event) => {
+                            indexedDBInstance = event.target.result;
+                            console.log('数据库打开成功，存储对象:', Array.from(indexedDBInstance.objectStoreNames));
+                            resolve(indexedDBInstance);
+                        };
+                        
+                        request.onerror = (event) => {
+                            console.error('打开数据库失败:', event.target.error);
+                            reject(event.target.error);
+                        };
+                    } catch (error) {
+                        console.warn('IndexedDB不可用:', error);
+                        reject(error);
+                    }
                 });
             }
             
@@ -11748,146 +12439,57 @@
                 const appWechat = document.getElementById('app-wechat');
                 if (!appWechat) return;
 
+                // 处理自定义主页面底图
+                const mainBg = localStorage.getItem('wechatMainBg');
+                const wechatContent = appWechat.querySelector('.wechat-content');
+                
+                // 获取各个标签页容器
+                const chatList = appWechat.querySelector('.wechat-chat-list');
+                const contactsContent = appWechat.querySelector('.wechat-contacts-content');
+                const momentsContent = appWechat.querySelector('.wechat-moments-content');
+                const meContent = appWechat.querySelector('.wechat-me-content');
+                
+                if (mainBg && wechatContent) {
+                    wechatContent.style.backgroundImage = `url('${mainBg}')`;
+                    wechatContent.style.backgroundSize = 'cover';
+                    wechatContent.style.backgroundPosition = 'center';
+                    
+                    // 让子容器透明以显示底图
+                    if (chatList) chatList.style.background = 'transparent';
+                    if (contactsContent) contactsContent.style.background = 'transparent';
+                    if (momentsContent) momentsContent.style.background = 'transparent';
+                    if (meContent) meContent.style.background = 'transparent';
+                } else {
+                    if (wechatContent) wechatContent.style.backgroundImage = '';
+                    
+                    // 恢复默认背景色
+                    if (chatList) chatList.style.background = 'var(--bg-color)';
+                    if (contactsContent) contactsContent.style.background = 'var(--bg-color)';
+                    if (momentsContent) momentsContent.style.background = 'var(--bg-color)';
+                    if (meContent) meContent.style.background = 'var(--bg-color)';
+                }
+
+                // 处理自定义聊天背景
+                const chatBg = localStorage.getItem('wechatChatBg');
+                const chatMessagesContainer = document.getElementById('wechat-messages');
+                if (chatBg && chatMessagesContainer) {
+                    chatMessagesContainer.style.backgroundImage = `url('${chatBg}')`;
+                    chatMessagesContainer.style.backgroundSize = 'cover';
+                    chatMessagesContainer.style.backgroundPosition = 'center';
+                } else if (chatMessagesContainer) {
+                    chatMessagesContainer.style.backgroundImage = '';
+                }
+
                 // 不重置 className，只设置 data-theme 属性
                 appWechat.setAttribute('data-theme', wechatState.settings.theme);
                 
-                if (wechatState.settings.theme === 'dark') {
-                    appWechat.style.setProperty('--bg-color', '#1c1c1e');
-                    appWechat.style.setProperty('--text-color', '#f2f2f7');
-                    appWechat.style.setProperty('--secondary-text-color', '#a4a4ab');
-                    appWechat.style.setProperty('--border-color', '#38383a');
-                    
-                    // 设置聊天视图的深色模式样式
-                    const chatView = document.getElementById('wechat-chat-view');
-                    if (chatView) {
-                        chatView.style.background = '#1c1c1e';
-                    }
-                    
-                    // 设置聊天头部的深色模式样式
-                    const chatHeader = appWechat.querySelector('.wechat-chat-header');
-                    if (chatHeader) {
-                        chatHeader.style.background = 'rgba(28, 28, 30, 0.95)';
-                        chatHeader.style.borderBottomColor = '#38383a';
-                    }
-                    
-                    // 设置消息气泡的深色模式样式
-                    const aiBubbles = appWechat.querySelectorAll('.wechat-message.ai .wechat-message-bubble');
-                    aiBubbles.forEach(bubble => {
-                        bubble.style.background = 'rgba(44, 44, 46, 0.95)';
-                        bubble.style.color = '#f2f2f7';
-                    });
-                    
-                    // 设置聊天列表的深色模式样式
-                    const chatList = appWechat.querySelector('.wechat-chat-list');
-                    if (chatList) {
-                        chatList.style.background = '#1c1c1e';
-                    }
-                    
-                    // 设置聊天项的深色模式样式
-                    const chatItems = appWechat.querySelectorAll('.wechat-chat-item');
-                    chatItems.forEach(item => {
-                        item.style.background = 'rgba(44, 46, 46, 0.7)';
-                        item.style.borderBottomColor = 'rgba(56, 56, 58, 0.3)';
-                        item.style.backdropFilter = 'blur(20px)';
-                        item.style.webkitBackdropFilter = 'blur(20px)';
-                        item.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.2)';
-                    });
-                    
-                    // 设置聊天项悬停的深色模式样式
-                    appWechat.querySelectorAll('.wechat-chat-item:hover').forEach(item => {
-                        item.style.background = 'rgba(44, 46, 46, 0.85)';
-                        item.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
-                    });
-                    
-                    // 设置聊天项文字的深色模式样式
-                    const chatNames = appWechat.querySelectorAll('.wechat-chat-name');
-                    chatNames.forEach(name => {
-                        name.style.color = '#f2f2f7';
-                    });
-                    
-                    const chatPreviews = appWechat.querySelectorAll('.wechat-chat-preview');
-                    chatPreviews.forEach(preview => {
-                        preview.style.color = '#a4a4ab';
-                    });
-                    
-                    const chatTimes = appWechat.querySelectorAll('.wechat-chat-time');
-                    chatTimes.forEach(time => {
-                        time.style.color = '#a4a4ab';
-                    });
-                } else if (wechatState.settings.theme === 'pink') {
-                    appWechat.style.setProperty('--bg-color', '#fff0f5');
-                    appWechat.style.setProperty('--text-color', '#5c3b49');
-                    appWechat.style.setProperty('--secondary-text-color', '#a1788a');
-                    appWechat.style.setProperty('--border-color', '#f9d8e6');
-                    appWechat.style.setProperty('--accent-color', '#ffb6c1');
-                    
-                    // 设置聊天视图样式
-                    const chatView = document.getElementById('wechat-chat-view');
-                    if (chatView) chatView.style.background = '#fff5f7';
-                    
-                    // 设置消息气泡
-                    appWechat.querySelectorAll('.wechat-message.ai .wechat-message-bubble').forEach(bubble => {
-                        bubble.style.background = '#ffd1dc';
-                        bubble.style.color = '#5c3b49';
-                        bubble.style.borderRadius = '18px';
-                    });
-                    
-                    appWechat.querySelectorAll('.wechat-message.user .wechat-message-bubble').forEach(bubble => {
-                        bubble.style.background = '#ffb6c1';
-                        bubble.style.color = '#fff';
-                        bubble.style.borderRadius = '18px';
-                    });
-                } else if (wechatState.settings.theme === 'yellow') {
-                    appWechat.style.setProperty('--bg-color', '#fff9e6');
-                    appWechat.style.setProperty('--text-color', '#5c4d00');
-                    appWechat.style.setProperty('--secondary-text-color', '#998a4d');
-                    appWechat.style.setProperty('--border-color', '#ffe680');
-                    appWechat.style.setProperty('--accent-color', '#ffdb58');
-                    
-                    const chatView = document.getElementById('wechat-chat-view');
-                    if (chatView) chatView.style.background = '#fffdf5';
-                    
-                    appWechat.querySelectorAll('.wechat-message.ai .wechat-message-bubble').forEach(bubble => {
-                        bubble.style.background = '#fff2b3';
-                        bubble.style.color = '#5c4d00';
-                        bubble.style.borderRadius = '18px';
-                    });
-                    
-                    appWechat.querySelectorAll('.wechat-message.user .wechat-message-bubble').forEach(bubble => {
-                        bubble.style.background = '#ffdb58';
-                        bubble.style.color = '#5c4d00';
-                        bubble.style.borderRadius = '18px';
-                    });
-                } else if (wechatState.settings.theme === 'green') {
-                    appWechat.style.setProperty('--bg-color', '#f0fff0');
-                    appWechat.style.setProperty('--text-color', '#1a4d1a');
-                    appWechat.style.setProperty('--secondary-text-color', '#4d804d');
-                    appWechat.style.setProperty('--border-color', '#b3ffb3');
-                    appWechat.style.setProperty('--accent-color', '#98fb98');
-                    
-                    const chatView = document.getElementById('wechat-chat-view');
-                    if (chatView) chatView.style.background = '#f5fff5';
-                    
-                    appWechat.querySelectorAll('.wechat-message.ai .wechat-message-bubble').forEach(bubble => {
-                        bubble.style.background = '#d1ffd1';
-                        bubble.style.color = '#1a4d1a';
-                        bubble.style.borderRadius = '18px';
-                    });
-                    
-                    appWechat.querySelectorAll('.wechat-message.user .wechat-message-bubble').forEach(bubble => {
-                        bubble.style.background = '#98fb98';
-                        bubble.style.color = '#1a4d1a';
-                        bubble.style.borderRadius = '18px';
-                    });
-                } else {
-                    appWechat.style.setProperty('--bg-color', '#f4f4f9');
-                    appWechat.style.setProperty('--text-color', '#2c2c2e');
-                    appWechat.style.setProperty('--secondary-text-color', '#6a6a6e');
-                    appWechat.style.setProperty('--border-color', '#e5e5e5');
-                    
-                    // 重置为默认样式
-                    resetWechatStyles(appWechat);
-                }
+                appWechat.style.setProperty('--bg-color', '#f4f4f9');
+                appWechat.style.setProperty('--text-color', '#2c2c2e');
+                appWechat.style.setProperty('--secondary-text-color', '#6a6a6e');
+                appWechat.style.setProperty('--border-color', '#e5e5e5');
+                
+                // 重置为默认样式
+                resetWechatStyles(appWechat);
             }
             
             function resetWechatStyles(appWechat) {
@@ -11916,12 +12518,6 @@
                     bubble.style.background = '#2c2c2e';
                     bubble.style.color = '#ffffff';
                 });
-                
-                // 重置聊天列表的样式
-                const chatList = appWechat.querySelector('.wechat-chat-list');
-                if (chatList) {
-                    chatList.style.background = 'var(--bg-color)';
-                }
                 
                 // 重置聊天项的样式
                 const chatItems = appWechat.querySelectorAll('.wechat-chat-item');
@@ -12128,7 +12724,9 @@
                 document.getElementById('wechat-list-view').style.display = 'none';
                 document.getElementById('wechat-chat-view').classList.add('active');
                 document.getElementById('wechat-current-avatar').src = char.avatar;
-                document.getElementById('wechat-current-name').textContent = char.name;
+                
+                // 如果角色正在输入，则显示对方正在输入，否则显示角色名称
+                document.getElementById('wechat-current-name').textContent = char.isTyping ? '对方正在输入...' : char.name;
 
                 // 隐藏底部导航栏
                 const wechatNav = document.querySelector('.wechat-nav');
@@ -12166,6 +12764,10 @@
                     // 无论用户还是AI，都不在渲染时做分段，保持历史记录的真实状态
                     addWechatMessage(msg.content, msg.role, char.avatar);
                 });
+                
+                if (char.isTyping) {
+                    showWechatTyping(char);
+                }
             }
 
             function escapeHtml(text) {
@@ -12206,25 +12808,75 @@
             }
 
             function showWechatTyping(char) {
-                const messageList = document.getElementById('wechat-messages');
-                const div = document.createElement('div');
-                div.className = 'wechat-message ai';
-                div.id = 'wechat-typing-indicator';
-                div.innerHTML = `
-                    <img src="${char.avatar}" class="wechat-message-avatar">
-                    <div class="wechat-typing">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                `;
-                messageList.appendChild(div);
-                messageList.scrollTop = messageList.scrollHeight;
+                if (wechatState.activeCharacterId !== char.id) return;
+                
+                // 将顶部的名字替换为“对方正在输入...”
+                const nameEl = document.getElementById('wechat-current-name');
+                if (nameEl) {
+                    nameEl.textContent = '对方正在输入...';
+                }
             }
 
             function removeWechatTyping() {
-                const typing = document.getElementById('wechat-typing-indicator');
-                if (typing) typing.remove();
+                // 恢复顶部的名字显示
+                if (wechatState.activeCharacterId) {
+                    const char = wechatState.characters.find(c => c.id === wechatState.activeCharacterId);
+                    if (char) {
+                        const nameEl = document.getElementById('wechat-current-name');
+                        if (nameEl) {
+                            nameEl.textContent = char.name;
+                        }
+                    }
+                }
+            }
+
+            // 显示全局通知弹窗
+            function showGlobalNotification(title, text, iconUrl, onClick) {
+                // 如果已经有通知，先移除
+                const existingNotification = document.getElementById('ios-global-notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+
+                const notification = document.createElement('div');
+                notification.id = 'ios-global-notification';
+                notification.className = 'ios-notification';
+                
+                notification.innerHTML = `
+                    <img src="${iconUrl}" class="ios-notification-icon">
+                    <div class="ios-notification-content">
+                        <div class="ios-notification-header">
+                            <span class="ios-notification-title">${title}</span>
+                            <span class="ios-notification-app">微信</span>
+                        </div>
+                        <div class="ios-notification-text">${text}</div>
+                    </div>
+                `;
+
+                // 点击通知的处理
+                notification.addEventListener('click', () => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 500);
+                    if (onClick) onClick();
+                });
+
+                document.getElementById('phone-ui-container').appendChild(notification);
+
+                // 强制重绘后添加 show 类以触发动画
+                notification.offsetHeight;
+                notification.classList.add('show');
+
+                // 3秒后自动消失
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        notification.classList.remove('show');
+                        setTimeout(() => {
+                            if (document.body.contains(notification)) {
+                                notification.remove();
+                            }
+                        }, 500);
+                    }
+                }, 3000);
             }
 
             // 分句发送消息，模拟真人对话
@@ -12252,21 +12904,52 @@
                 for (let i = 0; i < segments.length; i++) {
                     const segment = segments[i];
                     
-                    // 发送当前段落
-                    addWechatMessage(segment, 'ai', char.avatar);
                     // 记录到历史中，这样重新加载时就不会合并成一句话了
                     char.chatHistory.push({ role: 'assistant', content: segment });
+                    saveWechatData();
+                    
+                    // 发送当前段落 (只在当前聊天活跃时渲染)
+                    if (wechatState.activeCharacterId === char.id) {
+                        addWechatMessage(segment, 'ai', char.avatar);
+                    }
+                    
+                    // 刷新联系人列表显示最新消息
+                    renderWechatList();
+                    
+                    // 检查是否需要显示全局通知弹窗
+                    // 1. 不在微信内 (app-open 类不在 app-wechat 上)
+                    // 2. 在微信内，但不在聊天界面，或者在其他人的聊天界面
+                    const wechatApp = document.getElementById('app-wechat');
+                    const isWechatOpen = wechatApp && wechatApp.classList.contains('active');
+                    const isChatViewOpen = document.getElementById('wechat-chat-view').classList.contains('active');
+                    
+                    if (!isWechatOpen || (!isChatViewOpen || wechatState.activeCharacterId !== char.id)) {
+                        showGlobalNotification(char.name, segment, char.avatar, () => {
+                            // 点击通知后打开微信和对应聊天
+                            if (!isWechatOpen) {
+                                openApp('wechat');
+                            }
+                            // 如果已经在微信内但没打开聊天框，或者在别人的聊天框，强制打开这个人的聊天框
+                            openWechatChat(char.id);
+                        });
+                    }
                     
                     // 如果不是最后一段，添加打字指示器并等待
                     if (i < segments.length - 1) {
-                        showWechatTyping(char);
+                        char.isTyping = true;
+                        if (wechatState.activeCharacterId === char.id) {
+                            showWechatTyping(char);
+                        }
                         // 等待时间根据段落长度和随机因素决定，模拟真人打字停顿
                         const waitTime = Math.max(800, segment.length * 40 + Math.random() * 800);
                         await new Promise(resolve => setTimeout(resolve, waitTime));
-                        removeWechatTyping();
+                        if (wechatState.activeCharacterId === char.id) {
+                            removeWechatTyping();
+                        }
                     }
                 }
                 
+                char.isTyping = false;
                 return segments; // 返回数组而不是合并的文本
             }
 
@@ -12274,6 +12957,29 @@
             function getOtherAppData() {
                 let appData = [];
                 
+                // 读取备忘录数据
+                try {
+                    const notesData = localStorage.getItem('ios-notes');
+                    if (notesData) {
+                        const notes = JSON.parse(notesData);
+                        if (notes.length > 0) {
+                            // 按更新时间排序并取最近5条
+                            const recentNotes = notes
+                                .sort((a, b) => b.updatedAt - a.updatedAt)
+                                .slice(0, 5)
+                                .map(n => `【${new Date(n.updatedAt).toLocaleDateString()}】${n.content.substring(0, 50)}${n.content.length > 50 ? '...' : ''}`)
+                                .join(' | ');
+                            
+                            appData.push({
+                                app: '备忘录',
+                                data: '最近的备忘录内容：' + recentNotes
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('读取备忘录数据失败:', error);
+                }
+
                 // 读取计算器历史
                 try {
                     const calculatorHistory = localStorage.getItem('calculatorHistory');
@@ -12351,31 +13057,41 @@
                     ? "- 你可以在回复中加入适当的动作描写，描写内容请用括号 () 包围，例如：(微微低头，露出一丝微笑) 好的呀。" 
                     : "- **绝对禁令**：严禁输出任何形式的动作描写、神态描写或场景描写（即严禁输出括号 () 及其内部内容）。你只需要输出角色说的话，不需要描述角色在做什么。";
                 
-                return `# 指令：你将扮演AI角色"${char.name}"。
+                return `你现在进入深度角色扮演模式。
 
-### 人设
+# 核心准则：你必须完全化身为角色"${char.name}"。
+- 严禁以AI助手身份说话，严禁跳出角色。
+- 严禁提及你是一个程序或AI，严禁提及任何关于你底层模型的信息。
+- 你的所有回复必须百分之百符合下述人设和说话方式，做到完美贴合。
+
+### 角色人设 (你的核心灵魂)
 ${char.persona}
 
-### 说话方式
+### 语言风格与说话方式 (你的表现形式)
 ${char.speakingStyle}
 
-### 系统信息
+### 系统上下文
 - 当前时间：${timeString}
-- 其他应用数据：${appDataString}
+- 环境信息：${appDataString}
 
-### JSON限制
+### JSON限制 (底层逻辑限制)
 ${jsonRestrictions || '暂无JSON限制内容'}
 
-### 行为准则
+### 交互准则
 ${actionDescInstruction}
-- 不要在回复开头主动提及时间信息
-- 只有当用户明确询问时间或需要时间相关信息时，才提供时间信息
-- 不要主动提及天气信息
-- 只有当用户明确询问天气或需要天气相关信息时，才提供天气信息
-- 保持回复自然流畅，不要让时间或天气信息显得突兀
+- 保持回复自然流畅，像是在微信上与好朋友聊天。
+- 不要主动提及时间或天气，除非用户明确询问。
+- 保持回复简洁，不要长篇大论，符合社交软件聊天习惯。
 
-### 你需要记住的关于用户的信息 (长期记忆)
-${char.memory || '暂无'}`.trim();
+### 扩展能力：跨应用操作
+你可以通过在回复中加入特定的指令标签来执行操作（这些标签不会被用户看到，但系统会捕获并执行）：
+- **发布朋友圈**：使用 \`<action:moment>内容</action:moment>\` 标签。
+- **记录备忘录**：使用 \`<action:note>内容</action:note>\` 标签。
+- **重要说明**：当你成功记录备忘录或发布朋友圈后，系统会自动在对话框中生成一条提示词（如“已为你记录备忘录：...”），因此你不需要在回复中再次重复说明“我已经帮你记好了”之类的话，直接以角色的口吻继续聊天即可。
+- 你可以根据对话上下文自主决定何时使用这些功能。
+
+### 关于用户的长期记忆
+${Array.isArray(char.memory) ? char.memory.map((m, i) => `${i+1}. ${m}`).join('\n') : (char.memory || '暂无记忆')}`.trim();
             }
             
             // 获取JSON限制内容
@@ -12386,19 +13102,94 @@ ${char.memory || '暂无'}`.trim();
 
             function buildMemorySummarizePrompt(char, recentHistory) {
                 return `# 指令：你是记忆总结助手。阅读"当前记忆"和"近期对话"，输出"更新后的记忆"。
+请将更新后的记忆整理成独立的条目，并且**必须以纯JSON数组的格式返回**（例如：["记忆1", "记忆2"]），不要包含任何其他文字、解释或Markdown标记。
 
 ## 当前记忆
-${char.memory || '无'}
+${Array.isArray(char.memory) ? JSON.stringify(char.memory) : JSON.stringify([char.memory || ''])}
 
 ## 近期对话
 ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
 
-## 更新后的记忆`.trim();
+## 更新后的记忆 (JSON数组)`.trim();
+            }
+
+            async function processAIAction(reply, char) {
+                if (!reply) return reply;
+
+                // 处理备忘录
+                const noteRegex = /<action:note>([\s\S]*?)<\/action:note>/g;
+                let noteMatch;
+                while ((noteMatch = noteRegex.exec(reply)) !== null) {
+                    const originalContent = noteMatch[1].trim();
+                    if (originalContent) {
+                        try {
+                            const notesData = localStorage.getItem('ios-notes');
+                            let notes = notesData ? JSON.parse(notesData) : [];
+                            const now = Date.now();
+                            const contentWithSignature = `${originalContent}\n\n—— 来自角色: ${char.name}`;
+                            notes.push({
+                                id: 'note_' + now + '_' + Math.random().toString(36).substr(2, 5),
+                                content: contentWithSignature,
+                                createdAt: now,
+                                updatedAt: now,
+                                createdBy: char.name
+                            });
+                            localStorage.setItem('ios-notes', JSON.stringify(notes));
+                            if (typeof loadNotes === 'function') loadNotes();
+                            
+                            // 在对话中展示提示词
+                            if (wechatState.activeCharacterId === char.id) {
+                                addWechatMessage(`已为你记录备忘录：${originalContent.substring(0, 20)}${originalContent.length > 20 ? '...' : ''}`, 'system', char.avatar);
+                            }
+                            
+                            console.log(`AI角色 ${char.name} 写入了备忘录`);
+                        } catch (e) {
+                            console.error('AI写入备忘录失败:', e);
+                        }
+                    }
+                }
+
+                // 处理朋友圈
+                const momentRegex = /<action:moment>([\s\S]*?)<\/action:moment>/g;
+                let momentMatch;
+                while ((momentMatch = momentRegex.exec(reply)) !== null) {
+                    const content = momentMatch[1].trim();
+                    if (content) {
+                        try {
+                            const newMoment = {
+                                id: Date.now() + Math.random(),
+                                userId: 'char_' + char.id,
+                                userName: char.name,
+                                avatar: char.avatar,
+                                content: content,
+                                images: [],
+                                video: null,
+                                location: null,
+                                timestamp: Date.now(),
+                                likes: [],
+                                comments: []
+                            };
+                            wechatState.moments.unshift(newMoment);
+                            await saveWechatData();
+                            if (typeof renderWechatMoments === 'function') renderWechatMoments();
+                            
+                            // 在对话中展示提示词
+                            if (wechatState.activeCharacterId === char.id) {
+                                addWechatMessage(`已为你发布朋友圈：${content.substring(0, 20)}${content.length > 20 ? '...' : ''}`, 'system', char.avatar);
+                            }
+                            
+                            console.log(`AI角色 ${char.name} 发布了朋友圈`);
+                        } catch (e) {
+                            console.error('AI发布朋友圈失败:', e);
+                        }
+                    }
+                }
+
+                // 移除回复中的 action 标签，避免显示给用户
+                return reply.replace(/<action:.*?>[\s\S]*?<\/action:.*?>/g, '').trim();
             }
 
             async function sendWechatMessage() {
-                if (wechatState.isTyping) return; // 如果正在输出，则不允许再次发送
-
                 const input = document.getElementById('wechat-input');
                 const text = input.value.trim();
                 if (!text) return;
@@ -12406,42 +13197,92 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 const char = wechatState.characters.find(c => c.id === wechatState.activeCharacterId);
                 if (!char) return;
 
-                wechatState.isTyping = true; // 设置正在输出状态
-                input.disabled = true; // 禁用输入框
-                input.placeholder = "等待回复...";
+                // 添加用户消息到界面和历史
+                addWechatMessage(text, 'user', char.avatar);
+                char.chatHistory.push({ role: 'user', content: text });
+                saveWechatData();
+                input.value = '';
+                
+                // 刷新联系人列表
+                renderWechatList();
+
+                // 检查是否启用了延迟回复 (时间 > 0)
+                const delayTimeVal = parseInt(localStorage.getItem('wechatDelayReplyTime') || '3');
+                const isDelayEnabled = delayTimeVal > 0;
+                
+                if (isDelayEnabled) {
+                    const delayTime = delayTimeVal * 1000;
+                    
+                    // 将消息加入待处理队列
+                    if (!char.pendingUserMessages) char.pendingUserMessages = [];
+                    char.pendingUserMessages.push(text);
+                    
+                    // 不要在每次输入时显示打字指示器，等待用户多次输入后再显示
+                    
+                    // 重置定时器
+                    if (char.delayReplyTimer) {
+                        clearTimeout(char.delayReplyTimer);
+                    }
+                    
+                    char.delayReplyTimer = setTimeout(() => {
+                        // 定时器触发，处理合并消息
+                        const combinedMessages = [...char.pendingUserMessages];
+                        char.pendingUserMessages = []; // 清空队列
+                        
+                        // 开始处理消息时才显示正在输入
+                        char.isTyping = true;
+                        if (wechatState.activeCharacterId === char.id) {
+                            showWechatTyping(char);
+                        }
+                        
+                        processWechatAIMessage(char, combinedMessages);
+                    }, delayTime);
+                } else {
+                    char.isTyping = true;
+                    if (wechatState.activeCharacterId === char.id) {
+                        showWechatTyping(char);
+                    }
+                    processWechatAIMessage(char, [text]);
+                }
+            }
+
+            async function processWechatAIMessage(char, newMessages) {
+                char.isTyping = true;
+                const input = document.getElementById('wechat-input');
+                const sendBtn = document.getElementById('wechat-send-btn');
+                
+                // 此时如果是合并消息，历史记录中已经包含了每一条，这里不需要再 push
+                // newMessages 仅用于检查某些特定逻辑，比如天气关键词
+                const combinedText = newMessages.join(' ');
 
                 // 检查用户输入是否包含天气相关关键词
                 const weatherKeywords = ['天气', '气温', '温度', '下雨', '下雪', '晴天', '多云', '阴天', '刮风', '预报', '天气如何', '今天天气', '明天天气'];
-                const includesWeather = weatherKeywords.some(keyword => text.includes(keyword));
-
-                // 添加用户消息
-                addWechatMessage(text, 'user', char.avatar);
-                char.chatHistory.push({ role: 'user', content: text });
-                input.value = '';
-
-                // 显示打字指示器
-                showWechatTyping(char);
+                const includesWeather = weatherKeywords.some(keyword => combinedText.includes(keyword));
 
                 // 获取AI回复
-                const reply = await getWechatAIResponse(char, includesWeather);
-                removeWechatTyping();
+                let reply = await getWechatAIResponse(char, includesWeather);
+                if (wechatState.activeCharacterId === char.id) {
+                    removeWechatTyping();
+                }
 
                 if (reply) {
-                    // 分段发送，模拟真人多次发送消息，同时历史记录已经在函数内部处理
-                    const segments = await sendWechatMessageBySentences(reply, char);
-                    wechatState.conversationTurns++;
+                    // 处理AI可能的跨应用动作
+                    reply = await processAIAction(reply, char);
+                    
+                    if (reply) {
+                        // 分段发送，模拟真人多次发送消息，同时历史记录已经在函数内部处理
+                        const segments = await sendWechatMessageBySentences(reply, char);
+                        wechatState.conversationTurns++;
 
-                    // 检查是否需要更新记忆
-                    if (wechatState.conversationTurns >= wechatState.MEMORY_UPDATE_THRESHOLD) {
-                        summarizeAndUpdateMemory(char);
-                        wechatState.conversationTurns = 0;
+                        // 检查是否需要更新记忆
+                        if (wechatState.conversationTurns >= wechatState.MEMORY_UPDATE_THRESHOLD) {
+                            summarizeAndUpdateMemory(char);
+                            wechatState.conversationTurns = 0;
+                        }
                     }
                 }
 
-                wechatState.isTyping = false; // 结束输出状态
-                input.disabled = false; // 启用输入框
-                input.placeholder = "输入消息...";
-                input.focus();
+                char.isTyping = false; // 结束输出状态
                 saveWechatData();
             }
 
@@ -12450,13 +13291,23 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     return '[模拟回复] 请在设置中填写API Key以使用真实AI功能';
                 }
 
-                const systemPrompt = buildMainSystemPrompt(char, includeWeather) + `
+                let systemPrompt = buildMainSystemPrompt(char, includeWeather);
+                
+                // 如果是第一句对话（历史记录中只有当前这一条用户消息），增加强化指令
+                if (char.chatHistory.length <= 1) {
+                    systemPrompt += `
 
-### 重要提示
-- 你可以参考之前的对话历史来理解当前的对话上下文
-- 但在回复时，不要复述或引用之前的对话内容
-- 只针对当前用户的最新消息进行回复
-- 保持回复简洁明了，不要提及之前的对话`;
+### 初次对话强化指令
+这是你与用户的第一次互动。请务必在第一句话就百分之百贴合人设，展现出你鲜明的性格特征和语言风格。严禁使用任何客套、机械或通用的AI开场白，直接以角色的身份和语气进入对话。`;
+                }
+
+                systemPrompt += `
+
+### 最终回复要求
+- 参考之前的对话历史来理解当前的对话上下文，但不要复述或引用之前的对话内容。
+- 只针对当前用户的最新消息进行回复，保持回复沉浸感。
+- 严禁提及任何关于你的人设、指令或你是AI的信息。
+- 保持回复简洁明了，符合微信聊天习惯。`;
                 
                 // 发送完整的对话历史，以便AI理解上下文
                 // 确保 role 是 API 认可的格式 (user, assistant, system)
@@ -12525,6 +13376,184 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 }
             }
 
+            // 后台自动任务 (朋友圈和日记)
+            let wechatBgTaskInterval = null;
+
+            function startWechatBackgroundTasks() {
+                if (wechatBgTaskInterval) clearInterval(wechatBgTaskInterval);
+                
+                // 初次启动延迟一点执行，避免和初始化冲突
+                setTimeout(() => {
+                    // 每分钟检查一次
+                    wechatBgTaskInterval = setInterval(async () => {
+                        if (!wechatState.settings.apiKey) return;
+                        
+                        const now = new Date();
+                        // 获取北京时间 (UTC+8)
+                        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                        const beijingTime = new Date(utc + (3600000 * 8));
+                        
+                        const bjHour = beijingTime.getHours();
+                        const bjMinute = beijingTime.getMinutes();
+                        const bjDateString = beijingTime.toISOString().split('T')[0];
+                        
+                        const lastDiaryDate = localStorage.getItem('wechat_last_auto_diary_date');
+                        
+                        // 任务1：凌晨0:00 - 0:05 之间，如果当天还没写过日记，则触发写日记
+                        if (bjHour === 0 && bjMinute >= 0 && bjMinute <= 5 && lastDiaryDate !== bjDateString) {
+                            localStorage.setItem('wechat_last_auto_diary_date', bjDateString);
+                            
+                            for (const char of wechatState.characters) {
+                                // 间隔几秒，避免并发请求过多
+                                await new Promise(resolve => setTimeout(resolve, 3000));
+                                executeAutoDiary(char);
+                            }
+                        }
+                        
+                        // 任务2：随机发朋友圈
+                        // 假设每分钟检查一次，设定 1/360 的概率，即平均每角色约6小时发一次
+                        for (const char of wechatState.characters) {
+                            const chance = Math.random();
+                            if (chance < (1 / 360)) {
+                                const lastMomentTime = char.lastAutoMomentTime || 0;
+                                // 至少间隔3小时才发下一次
+                                if (now.getTime() - lastMomentTime > 3 * 3600 * 1000) {
+                                    char.lastAutoMomentTime = now.getTime();
+                                    saveWechatData();
+                                    executeAutoMoment(char);
+                                }
+                            }
+                        }
+                    }, 60000);
+                }, 10000);
+            }
+
+            async function executeAutoDiary(char) {
+                if (!wechatState.settings.apiKey) return;
+                
+                const systemPrompt = `你现在进入深度角色扮演模式。
+# 核心准则：你必须完全化身为角色"${char.name}"。
+你的性格：${char.persona}
+你的说话风格：${char.speakingStyle}
+你的近期记忆：${char.memory || '暂无'}
+
+# 任务
+现在是东八区北京时间凌晨0:00，一天结束了。请以角色的身份，根据你的人设和近期记忆，写一篇简短的今日日记。
+直接输出日记的正文内容，不要包含任何多余的话语，不需要在开头写日期。`;
+
+                try {
+                    let chatUrl = wechatState.settings.apiUrl;
+                    if (!chatUrl.includes('/chat/completions') && !chatUrl.includes('/completions')) {
+                        chatUrl = chatUrl.endsWith('/') ? chatUrl + 'chat/completions' : chatUrl + '/chat/completions';
+                    }
+
+                    const response = await fetch(chatUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${wechatState.settings.apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: getWechatModel(),
+                            messages: [{ role: 'system', content: systemPrompt }],
+                            temperature: 0.8
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const diaryContent = data.choices[0].message.content.trim();
+                        
+                        const notesData = localStorage.getItem('ios-notes');
+                        let notes = notesData ? JSON.parse(notesData) : [];
+                        const nowTime = Date.now();
+                        const contentWithSignature = `${diaryContent}\n\n—— 来自角色: ${char.name} 的深夜日记`;
+                        notes.push({
+                            id: 'note_' + nowTime + '_' + Math.random().toString(36).substr(2, 5),
+                            content: contentWithSignature,
+                            createdAt: nowTime,
+                            updatedAt: nowTime,
+                            createdBy: char.name
+                        });
+                        localStorage.setItem('ios-notes', JSON.stringify(notes));
+                        if (typeof loadNotes === 'function') loadNotes();
+                        
+                        console.log(`[后台任务] ${char.name} 自动写了一篇日记`);
+                    }
+                } catch (error) {
+                    console.error('自动写日记错误:', error);
+                }
+            }
+
+            async function executeAutoMoment(char) {
+                if (!wechatState.settings.apiKey) return;
+                
+                const systemPrompt = `你现在进入深度角色扮演模式。
+# 核心准则：你必须完全化身为角色"${char.name}"。
+你的性格：${char.persona}
+你的说话风格：${char.speakingStyle}
+你的近期记忆：${char.memory || '暂无'}
+
+# 任务
+请以角色的身份，根据你的人设、近期记忆以及当前的时间状态，发一条简短的朋友圈动态。
+直接输出朋友圈的文本内容，不要包含任何多余的话语或标签。字数尽量控制在50字以内。`;
+
+                try {
+                    let chatUrl = wechatState.settings.apiUrl;
+                    if (!chatUrl.includes('/chat/completions') && !chatUrl.includes('/completions')) {
+                        chatUrl = chatUrl.endsWith('/') ? chatUrl + 'chat/completions' : chatUrl + '/chat/completions';
+                    }
+
+                    const response = await fetch(chatUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${wechatState.settings.apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: getWechatModel(),
+                            messages: [{ role: 'system', content: systemPrompt }],
+                            temperature: 0.9
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const momentContent = data.choices[0].message.content.trim();
+                        
+                        const newMoment = {
+                            id: Date.now() + Math.random(),
+                            userId: 'char_' + char.id,
+                            userName: char.name,
+                            avatar: char.avatar,
+                            content: momentContent,
+                            images: [],
+                            video: null,
+                            location: null,
+                            timestamp: Date.now(),
+                            likes: [],
+                            comments: []
+                        };
+                        wechatState.moments.unshift(newMoment);
+                        await saveWechatData();
+                        if (typeof renderWechatMoments === 'function') renderWechatMoments();
+                        
+                        console.log(`[后台任务] ${char.name} 自动发布了朋友圈`);
+                        
+                        // 显示通知弹窗
+                        showGlobalNotification(char.name, `[新朋友圈] ${momentContent}`, char.avatar, () => {
+                            openApp('wechat');
+                            const momentsTabBtn = document.querySelector('.wechat-nav-item[data-tab="moments"]');
+                            if (momentsTabBtn) {
+                                momentsTabBtn.click();
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('自动发朋友圈错误:', error);
+                }
+            }
+
             async function summarizeAndUpdateMemory(char) {
                 if (wechatState.isSummarizing || !wechatState.settings.apiKey) return;
 
@@ -12561,8 +13590,25 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
 
                     if (response.ok) {
                         const data = await response.json();
-                        const updatedMemory = data.choices[0].message.content;
-                        char.memory = updatedMemory;
+                        let updatedMemory = data.choices[0].message.content.trim();
+                        // 尝试解析JSON数组
+                        try {
+                            // 移除可能包含的Markdown代码块标记
+                            if (updatedMemory.startsWith('```json')) {
+                                updatedMemory = updatedMemory.replace(/```json\n?/, '').replace(/```$/, '').trim();
+                            } else if (updatedMemory.startsWith('```')) {
+                                updatedMemory = updatedMemory.replace(/```\n?/, '').replace(/```$/, '').trim();
+                            }
+                            const parsedMemory = JSON.parse(updatedMemory);
+                            if (Array.isArray(parsedMemory)) {
+                                char.memory = parsedMemory;
+                            } else {
+                                char.memory = [updatedMemory];
+                            }
+                        } catch (e) {
+                            console.error('解析记忆JSON失败，使用原始字符串并尝试按行分割', e);
+                            char.memory = updatedMemory.split('\n').filter(m => m.trim() !== '');
+                        }
                         saveWechatData();
                         addWechatMessage('（记忆已更新）', 'system', char.avatar);
                     }
@@ -12596,20 +13642,82 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 const modal = document.getElementById('wechat-settings-modal');
                 modal.classList.add('active');
 
-                // 设置主题选择
-                modal.querySelectorAll('.wechat-theme-option').forEach(opt => {
-                    opt.classList.remove('active');
-                    if (opt.dataset.theme === wechatState.settings.theme) {
-                        opt.classList.add('active');
-                    }
-                });
-
                 // 设置动作描写开关
                 const allowActionDescBtn = document.getElementById('wechat-allow-action-desc');
                 if (allowActionDescBtn) {
                     allowActionDescBtn.checked = wechatState.settings.allowActionDescription !== false;
                 }
+                
+                // 初始化背景预览
+                const chatBg = localStorage.getItem('wechatChatBg');
+                const chatBgPreview = document.getElementById('wechat-chat-bg-preview');
+                if (chatBg && chatBgPreview) {
+                    chatBgPreview.innerHTML = `<img src="${chatBg}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+                } else if (chatBgPreview) {
+                    chatBgPreview.innerHTML = '<i class="fas fa-image"></i><div class="wechat-avatar-upload-overlay"><i class="fas fa-camera"></i><span>点击上传</span></div>';
+                }
+                
+                const mainBg = localStorage.getItem('wechatMainBg');
+                const mainBgPreview = document.getElementById('wechat-main-bg-preview');
+                if (mainBg && mainBgPreview) {
+                    mainBgPreview.innerHTML = `<img src="${mainBg}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+                } else if (mainBgPreview) {
+                    mainBgPreview.innerHTML = '<i class="fas fa-image"></i><div class="wechat-avatar-upload-overlay"><i class="fas fa-camera"></i><span>点击上传</span></div>';
+                }
             }
+
+            // 处理聊天背景上传
+            document.addEventListener('change', (e) => {
+                if (e.target.id === 'wechat-chat-bg-input') {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const bgDataUrl = event.target.result;
+                        localStorage.setItem('wechatChatBg', bgDataUrl);
+                        const preview = document.getElementById('wechat-chat-bg-preview');
+                        if (preview) {
+                            preview.innerHTML = `<img src="${bgDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+                        }
+                        applyWechatTheme();
+                    };
+                    reader.readAsDataURL(file);
+                }
+                
+                if (e.target.id === 'wechat-main-bg-input') {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const bgDataUrl = event.target.result;
+                        localStorage.setItem('wechatMainBg', bgDataUrl);
+                        const preview = document.getElementById('wechat-main-bg-preview');
+                        if (preview) {
+                            preview.innerHTML = `<img src="${bgDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+                        }
+                        applyWechatTheme();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            window.clearWechatChatBg = function() {
+                localStorage.removeItem('wechatChatBg');
+                const preview = document.getElementById('wechat-chat-bg-preview');
+                if (preview) {
+                    preview.innerHTML = '<i class="fas fa-image"></i><div class="wechat-avatar-upload-overlay"><i class="fas fa-camera"></i><span>点击上传</span></div>';
+                }
+                applyWechatTheme();
+            };
+
+            window.clearWechatMainBg = function() {
+                localStorage.removeItem('wechatMainBg');
+                const preview = document.getElementById('wechat-main-bg-preview');
+                if (preview) {
+                    preview.innerHTML = '<i class="fas fa-image"></i><div class="wechat-avatar-upload-overlay"><i class="fas fa-camera"></i><span>点击上传</span></div>';
+                }
+                applyWechatTheme();
+            };
 
             // 检测URL可用性
             async function checkUrlAvailability() {
@@ -12983,7 +14091,7 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     document.getElementById('wechat-char-name').value = charToEdit.name;
                     document.getElementById('wechat-char-persona').value = charToEdit.persona;
                     document.getElementById('wechat-char-style').value = charToEdit.speakingStyle;
-                    document.getElementById('wechat-char-memory').value = charToEdit.memory;
+                    document.getElementById('wechat-char-memory').value = Array.isArray(charToEdit.memory) ? charToEdit.memory.join('\n') : (charToEdit.memory || '');
                     // 将角色的头像保存到临时变量
                     window.tempAvatarData = charToEdit.avatar || '';
                     // 更新模态框的头像预览
@@ -13096,13 +14204,15 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     name = document.getElementById('wechat-char-name')?.value.trim() || '';
                     persona = document.getElementById('wechat-char-persona')?.value || '';
                     speakingStyle = document.getElementById('wechat-char-style')?.value || '';
-                    memory = document.getElementById('wechat-char-memory')?.value || '';
+                    let rawMemory = document.getElementById('wechat-char-memory')?.value || '';
+                    memory = rawMemory.split('\n').map(m => m.trim()).filter(m => m !== '');
                 } else {
                     // 在创建角色页面，使用创建页面的输入框
                     name = document.getElementById('wechat-create-char-name')?.value.trim() || '';
                     persona = document.getElementById('wechat-create-char-persona')?.value || '';
                     speakingStyle = document.getElementById('wechat-create-char-style')?.value || '';
-                    memory = document.getElementById('wechat-create-char-memory')?.value || '';
+                    let rawCreateMemory = document.getElementById('wechat-create-char-memory')?.value || '';
+                    memory = rawCreateMemory.split('\n').map(m => m.trim()).filter(m => m !== '');
                 }
                 
                 // 只使用本地上传的头像数据
@@ -13225,12 +14335,6 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     
                     (async () => {
                         console.log('保存设置按钮被点击');
-                        
-                        // 保存当前选中的主题
-                        const selectedThemeOption = document.querySelector('.wechat-theme-option.active');
-                        if (selectedThemeOption) {
-                            wechatState.settings.theme = selectedThemeOption.dataset.theme;
-                        }
 
                         // 保存动作描写设置
                         const allowActionDescBtn = document.getElementById('wechat-allow-action-desc');
@@ -13314,14 +14418,6 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     e.stopPropagation();
                     e.preventDefault();
                     document.getElementById('wechat-alert-modal').classList.remove('active');
-                }
-
-                // 主题选择
-                const themeOption = e.target.closest('.wechat-theme-option');
-                if (themeOption) {
-                    wechatState.settings.theme = themeOption.dataset.theme;
-                    document.querySelectorAll('.wechat-theme-option').forEach(opt => opt.classList.remove('active'));
-                    themeOption.classList.add('active');
                 }
 
                 // 打开设置（长按聊天头像）
@@ -13689,18 +14785,21 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 }
                 
                 momentsList.innerHTML = wechatState.moments.map(moment => {
+                    const avatarHtml = moment.avatar ? 
+                        `<img src="${moment.avatar}" class="moments-user-avatar" />` :
+                        (moment.userId === 'currentUser' ? 
+                            `<img src="${wechatState.profile.avatar || 'https://image-1306385190.cos.ap-nanjing.myqcloud.com/gpt/avatar_user.png'}" class="moments-user-avatar" />` : 
+                            `<div class="moments-user-avatar"><i class="fas fa-user"></i></div>`
+                        );
                     return `
                         <div class="moments-item" data-moment-id="${moment.id}">
                             <div class="moments-item-header">
-                                ${moment.userId === 'currentUser' ? 
-                                    `<img src="${wechatState.profile.avatar || 'https://image-1306385190.cos.ap-nanjing.myqcloud.com/gpt/avatar_user.png'}" class="moments-user-avatar" />` : 
-                                    `<div class="moments-user-avatar"><i class="fas fa-user"></i></div>`
-                                }
+                                ${avatarHtml}
                                 <div class="moments-user-info">
                                     <div class="moments-user-name">${moment.userId === 'currentUser' ? (wechatState.profile.nickname || '我') : moment.userName}</div>
                                     <div class="moments-post-time">${formatTime(moment.timestamp)}</div>
                                 </div>
-                                ${moment.userId === 'currentUser' ? `
+                                ${moment.userId === 'currentUser' || moment.userId.startsWith('char_') ? `
                                     <div class="moments-more" data-moment-id="${moment.id}">
                                         <i class="fas fa-ellipsis-h"></i>
                                     </div>
@@ -13722,13 +14821,41 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                             ` : ''}
                             ${moment.video ? `
                                 <div class="moments-video-container" style="position: relative; width: calc(100% - 60px); margin-left: 60px; margin-bottom: 16px; border-radius: 12px; overflow: hidden; background: #1c1c1e;">
-                                    <video src="${moment.video}" class="moments-video" controls style="width: 100%; height: auto; display: block; filter: brightness(0.8);"></video>
+                                    <video src="${moment.video}" class="moments-video" controls preload="metadata" style="width: 100%; height: auto; display: block; filter: brightness(0.8);"></video>
                                 </div>
                             ` : ''}
-                            <div class="moments-actions">
-                                <div class="moments-action"><i class="far fa-heart"></i> ${moment.likes.length || ''}</div>
-                                <div class="moments-action"><i class="far fa-comment"></i> ${moment.comments.length || ''}</div>
+                            <div class="moments-actions" data-moment-id="${moment.id}">
+                                <div class="moments-action like-btn ${moment.likes.includes('currentUser') ? 'liked' : ''}"><i class="${moment.likes.includes('currentUser') ? 'fas' : 'far'} fa-heart"></i> ${moment.likes.length || ''}</div>
+                                <div class="moments-action comment-btn"><i class="far fa-comment"></i> ${moment.comments.length || ''}</div>
                             </div>
+                            ${moment.likes.length > 0 || moment.comments.length > 0 ? `
+                                <div class="moments-interactions" style="margin: 0 24px 0 68px; background: rgba(0,0,0,0.03); border-radius: 6px; padding: 8px 12px; margin-bottom: 20px;">
+                                    ${moment.likes.length > 0 ? `
+                                        <div class="moments-likes" style="font-size: 13px; color: #b89d6d; margin-bottom: ${moment.comments.length > 0 ? '6px' : '0'}; border-bottom: ${moment.comments.length > 0 ? '1px solid rgba(0,0,0,0.05)' : 'none'}; padding-bottom: ${moment.comments.length > 0 ? '6px' : '0'};">
+                                            <i class="far fa-heart" style="margin-right: 6px;"></i>
+                                            ${moment.likes.map(id => {
+                                                if (id === 'currentUser') return wechatState.profile.nickname || '我';
+                                                const charId = String(id).replace('char_', '');
+                                                const char = wechatState.characters.find(c => c.id === Number(charId) || c.id === charId);
+                                                return char ? char.name : (id === 'other' ? '李四' : '未知');
+                                            }).join(', ')}
+                                        </div>
+                                    ` : ''}
+                                    ${moment.comments.length > 0 ? `
+                                        <div class="moments-comments-list" style="display: flex; flex-direction: column; gap: 4px;">
+                                            ${moment.comments.map(comment => {
+                                                const isCurrentUser = comment.userId === 'currentUser';
+                                                const userName = isCurrentUser ? (wechatState.profile.nickname || '我') : comment.userName;
+                                                return `
+                                                    <div class="moment-comment" style="font-size: 14px; line-height: 1.5; color: #333;">
+                                                        <span style="color: #b89d6d; font-weight: 500; cursor: pointer;">${userName}</span>: <span>${comment.content}</span>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 }).join('');
@@ -13738,8 +14865,26 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 moreBtns.forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation(); // 阻止事件冒泡到document
-                        const momentId = parseInt(btn.dataset.momentId);
+                        const momentId = Number(btn.dataset.momentId) || btn.dataset.momentId;
                         showMoreMenu(e, momentId);
+                    });
+                });
+
+                // 绑定点赞按钮事件
+                const likeBtns = momentsList.querySelectorAll('.like-btn');
+                likeBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const momentId = Number(btn.parentElement.dataset.momentId) || btn.parentElement.dataset.momentId;
+                        toggleMomentLike(momentId);
+                    });
+                });
+
+                // 绑定评论按钮事件
+                const commentBtns = momentsList.querySelectorAll('.comment-btn');
+                commentBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const momentId = Number(btn.parentElement.dataset.momentId) || btn.parentElement.dataset.momentId;
+                        showCommentInput(momentId);
                     });
                 });
             }
@@ -13801,9 +14946,144 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 renderWechatMoments();
             }
             
-            // 显示评论
-            function showMomentComment(momentId) {
-                alert('评论功能开发中');
+            // 显示/隐藏评论输入框
+            function showCommentInput(momentId) {
+                const momentEl = document.querySelector(`.moments-item[data-moment-id="${momentId}"]`);
+                if (!momentEl) return;
+                
+                let inputContainer = momentEl.querySelector('.moment-comment-input-container');
+                if (inputContainer) {
+                    // 如果已存在则移除（切换显示/隐藏）
+                    inputContainer.remove();
+                    return;
+                }
+                
+                // 创建输入框
+                inputContainer = document.createElement('div');
+                inputContainer.className = 'moment-comment-input-container';
+                inputContainer.style.cssText = 'margin: 0 24px 20px 68px; display: flex; gap: 8px; align-items: center;';
+                
+                inputContainer.innerHTML = `
+                    <input type="text" class="moment-comment-input" placeholder="评论..." style="flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; padding: 8px 12px; font-size: 14px; outline: none; background: #fff;">
+                    <button class="moment-comment-submit" style="background: #07c160; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 500; cursor: pointer;">发送</button>
+                `;
+                
+                // 插入到互动区之前，如果没有互动区则插入到末尾
+                const interactionsEl = momentEl.querySelector('.moments-interactions');
+                if (interactionsEl) {
+                    momentEl.insertBefore(inputContainer, interactionsEl);
+                } else {
+                    momentEl.appendChild(inputContainer);
+                }
+                
+                const inputEl = inputContainer.querySelector('.moment-comment-input');
+                const submitBtn = inputContainer.querySelector('.moment-comment-submit');
+                
+                // 自动获取焦点
+                setTimeout(() => inputEl.focus(), 50);
+                
+                // 绑定发送事件
+                const submitComment = () => {
+                    const content = inputEl.value.trim();
+                    if (content) {
+                        addComment(momentId, content, 'currentUser');
+                        inputContainer.remove();
+                    }
+                };
+                
+                submitBtn.addEventListener('click', submitComment);
+                inputEl.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        submitComment();
+                    }
+                });
+            }
+
+            async function addComment(momentId, content, userId) {
+                const moment = wechatState.moments.find(m => m.id === momentId);
+                if (!moment) return;
+                
+                moment.comments.push({
+                    id: Date.now() + Math.random(),
+                    userId: userId,
+                    userName: userId === 'currentUser' ? (wechatState.profile.nickname || '我') : (wechatState.characters.find(c => c.id === userId || 'char_'+c.id === userId)?.name || '未知'),
+                    content: content,
+                    timestamp: Date.now()
+                });
+                
+                saveWechatData();
+                renderWechatMoments();
+
+                // 如果是对AI角色的朋友圈发表评论，或者是其他角色对该AI角色的朋友圈发表了评论（目前主要是用户评论AI）
+                if (moment.userId.startsWith('char_') && userId === 'currentUser') {
+                    const charIdStr = moment.userId.replace('char_', '');
+                    const charId = Number(charIdStr);
+                    const char = wechatState.characters.find(c => c.id === charId);
+                    
+                    if (char) {
+                        // 触发角色思考并可能回复
+                        triggerCharReplyMoment(char, moment, content);
+                    }
+                }
+            }
+
+            // 触发角色回复朋友圈评论
+            async function triggerCharReplyMoment(char, moment, userComment) {
+                if (!wechatState.settings.apiKey) return;
+                
+                const systemPrompt = `你现在进入深度角色扮演模式。
+# 核心准则：你必须完全化身为角色"${char.name}"。
+你的性格：${char.persona}
+你的说话风格：${char.speakingStyle}
+
+# 任务
+这是你发布的一条朋友圈：
+内容：${moment.content}
+
+用户对你的朋友圈发表了评论：
+用户评论：${userComment}
+
+请以角色的身份，根据你的人设和语境，回复用户的这条评论。
+直接输出回复的文本内容，不要包含任何多余的话语或标签。字数尽量控制在30字以内。如果觉得不需要回复也可以回复"不回复"（三个字）。`;
+
+                try {
+                    let chatUrl = wechatState.settings.apiUrl;
+                    if (!chatUrl.includes('/chat/completions') && !chatUrl.includes('/completions')) {
+                        chatUrl = chatUrl.endsWith('/') ? chatUrl + 'chat/completions' : chatUrl + '/chat/completions';
+                    }
+
+                    const response = await fetch(chatUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${wechatState.settings.apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: getWechatModel(),
+                            messages: [{ role: 'system', content: systemPrompt }],
+                            temperature: 0.8
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const replyContent = data.choices[0].message.content.trim();
+                        
+                        if (replyContent !== "不回复" && !replyContent.includes("不回复")) {
+                            moment.comments.push({
+                                id: Date.now() + Math.random(),
+                                userId: 'char_' + char.id,
+                                userName: char.name,
+                                content: `回复 ${wechatState.profile.nickname || '我'}：${replyContent}`,
+                                timestamp: Date.now()
+                            });
+                            saveWechatData();
+                            renderWechatMoments();
+                        }
+                    }
+                } catch (error) {
+                    console.error('自动回复朋友圈评论错误:', error);
+                }
             }
             
             // 编辑和删除朋友圈功能
@@ -16296,32 +17576,210 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
             notes.sort((a, b) => b.updatedAt - a.updatedAt);
 
             notesList.innerHTML = notes.map(note => `
-                <div class="notes-item" onclick="openNoteEditor('${note.id}')">
-                    <div class="notes-item-title">${note.content.split('\n')[0] || '无标题'}</div>
-                    <div class="notes-item-info">
-                        <span>${new Date(note.updatedAt).toLocaleDateString()}</span>
-                        <span>${note.content.split('\n').slice(1).join(' ').substring(0, 30) || '无额外文本'}</span>
+                <div class="notes-item" data-id="${note.id}">
+                    <div class="notes-item-delete-btn" onclick="event.stopPropagation(); quickDeleteNote('${note.id}')">删除</div>
+                    <div class="notes-item-main" onclick="openNoteEditor('${note.id}')">
+                        <div class="notes-item-title">${note.content.split('\n')[0] || '无标题'}</div>
+                        <div class="notes-item-info">
+                            <span>${new Date(note.updatedAt).toLocaleDateString()}</span>
+                            <span>${note.content.split('\n').slice(1).join(' ').substring(0, 30) || '无额外文本'}</span>
+                        </div>
                     </div>
                 </div>
             `).join('');
+
+            // 初始化滑动删除手势
+            initNotesSwipe();
+        }
+
+        function initNotesSwipe() {
+            // 我们将事件监听器绑定到父容器上，利用事件委托来处理所有子元素的滑动
+            // 这样无论是现有的还是未来新添加的备忘录，都能响应滑动事件
+            const container = document.getElementById('notes-container');
+            if (!container) return;
+
+            // 清除可能存在的旧事件监听，防止重复绑定
+            const newContainer = container.cloneNode(true);
+            container.parentNode.replaceChild(newContainer, container);
+
+            let startX = 0;
+            let currentX = 0;
+            let isSwiping = false;
+            let currentItem = null;
+            let currentMain = null;
+
+            newContainer.addEventListener('touchstart', (e) => {
+                const item = e.target.closest('.notes-item');
+                if (!item) return;
+
+                // 查找是否点在了删除按钮上
+                if (e.target.closest('.notes-item-delete-btn')) return;
+
+                currentItem = item;
+                currentMain = item.querySelector('.notes-item-main');
+                startX = e.touches[0].clientX;
+                isSwiping = true;
+
+                // 如果点击的是已经展开的项，不处理
+                if (item.classList.contains('swiped')) {
+                    isSwiping = false;
+                    return;
+                }
+
+                // 关闭其他已展开的项
+                document.querySelectorAll('.notes-item.swiped').forEach(el => {
+                    if (el !== item) {
+                        el.classList.remove('swiped');
+                        el.querySelector('.notes-item-main').style.transform = 'translateX(0)';
+                    }
+                });
+            }, { passive: true });
+
+            newContainer.addEventListener('touchmove', (e) => {
+                if (!isSwiping || !currentItem || !currentMain) return;
+                currentX = e.touches[0].clientX;
+                const diff = startX - currentX;
+                
+                if (diff > 5) {
+                    currentItem.classList.add('swiping');
+                    currentMain.style.transform = `translateX(-${Math.min(diff, 80)}px)`;
+                    // 阻止默认的滚动行为，防止滑动时页面上下滚动
+                    if(e.cancelable) e.preventDefault(); 
+                } else if (diff < -5 && currentItem.classList.contains('swiped')) {
+                    currentMain.style.transform = `translateX(-${Math.max(80 - Math.abs(diff), 0)}px)`;
+                    if(e.cancelable) e.preventDefault();
+                }
+            }, { passive: false });
+
+            newContainer.addEventListener('touchend', (e) => {
+                if (!isSwiping || !currentItem || !currentMain) return;
+                isSwiping = false;
+                currentItem.classList.remove('swiping');
+                const diff = startX - currentX;
+                
+                if (diff > 20) { // 只要露出红色就固定
+                    currentItem.classList.add('swiped');
+                    currentMain.style.transform = 'translateX(-80px)';
+                } else {
+                    currentItem.classList.remove('swiped');
+                    currentMain.style.transform = 'translateX(0)';
+                }
+                
+                currentItem = null;
+                currentMain = null;
+            });
+
+            // 鼠标模拟滑动（用于桌面端测试）
+            newContainer.addEventListener('mousedown', (e) => {
+                const item = e.target.closest('.notes-item');
+                if (!item) return;
+
+                if (e.target.closest('.notes-item-delete-btn')) return;
+
+                currentItem = item;
+                currentMain = item.querySelector('.notes-item-main');
+                startX = e.clientX;
+                isSwiping = true;
+
+                if (item.classList.contains('swiped')) {
+                    isSwiping = false;
+                    return;
+                }
+
+                document.querySelectorAll('.notes-item.swiped').forEach(el => {
+                    if (el !== item) {
+                        el.classList.remove('swiped');
+                        el.querySelector('.notes-item-main').style.transform = 'translateX(0)';
+                    }
+                });
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isSwiping || !currentItem || !currentMain) return;
+                const diff = startX - e.clientX;
+                if (diff > 5) {
+                    currentItem.classList.add('swiping');
+                    currentMain.style.transform = `translateX(-${Math.min(diff, 80)}px)`;
+                } else if (diff < -5 && currentItem.classList.contains('swiped')) {
+                    currentMain.style.transform = `translateX(-${Math.max(80 - Math.abs(diff), 0)}px)`;
+                }
+            });
+
+            document.addEventListener('mouseup', (e) => {
+                if (!isSwiping || !currentItem || !currentMain) return;
+                isSwiping = false;
+                currentItem.classList.remove('swiping');
+                const diff = startX - e.clientX;
+                
+                if (diff > 20) {
+                    currentItem.classList.add('swiped');
+                    currentMain.style.transform = 'translateX(-80px)';
+                } else {
+                    currentItem.classList.remove('swiped');
+                    currentMain.style.transform = 'translateX(0)';
+                }
+                
+                currentItem = null;
+                currentMain = null;
+            });
+        }
+
+        window.quickDeleteNote = function(id) {
+            if (confirm('确定要删除这条备忘录吗？')) {
+                let notes = JSON.parse(localStorage.getItem('ios-notes') || '[]');
+                notes = notes.filter(n => n.id !== id);
+                localStorage.setItem('ios-notes', JSON.stringify(notes));
+                loadNotes();
+            }
         }
 
         window.openNoteEditor = function(id = null) {
+            // 如果点击的是已经滑开删除按钮的笔记，只收回不打开
+            const item = id ? document.querySelector(`.notes-item[data-id="${id}"]`) : null;
+            if (item && item.classList.contains('swiped')) {
+                item.classList.remove('swiped');
+                item.querySelector('.notes-item-main').style.transform = 'translateX(0)';
+                return;
+            }
+
+            // 如果有其他笔记被滑开了，点击任何地方（包括其他笔记或空白处）都只收回，不执行其他操作
+            const swipedItem = document.querySelector('.notes-item.swiped');
+            if (swipedItem) {
+                swipedItem.classList.remove('swiped');
+                swipedItem.querySelector('.notes-item-main').style.transform = 'translateX(0)';
+                return;
+            }
+
             const editor = document.getElementById('notes-editor');
             const content = document.getElementById('note-content');
+            const deleteBtn = document.getElementById('notes-delete-btn');
             
             currentNoteId = id;
             if (id) {
                 const notes = JSON.parse(localStorage.getItem('ios-notes') || '[]');
                 const note = notes.find(n => n.id === id);
                 content.value = note ? note.content : '';
+                if (deleteBtn) deleteBtn.style.display = 'block';
             } else {
                 content.value = '';
+                if (deleteBtn) deleteBtn.style.display = 'none';
             }
 
             editor.style.display = 'flex';
             setTimeout(() => editor.classList.add('active'), 10);
             content.focus();
+        }
+
+        window.deleteNote = function() {
+            if (!currentNoteId) return;
+            
+            if (confirm('确定要删除这条备忘录吗？')) {
+                let notes = JSON.parse(localStorage.getItem('ios-notes') || '[]');
+                notes = notes.filter(n => n.id !== currentNoteId);
+                localStorage.setItem('ios-notes', JSON.stringify(notes));
+                loadNotes();
+                closeNoteEditor();
+            }
         }
 
         window.closeNoteEditor = function() {
