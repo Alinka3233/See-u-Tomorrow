@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Please Remember Me Forever</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.net/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --bg-color: #f5f5f7;
@@ -350,6 +350,7 @@
             transition: transform 0.4s var(--spring-easing);
             width: 100%;
             position: relative; /* 为删除按钮提供定位基准 */
+            will-change: transform; /* 开启硬件加速，减少拖拽卡顿 */
         }
 
         .app-icon .icon {
@@ -391,7 +392,7 @@
 
         .icon.safari { 
             background: #fff; 
-            background-image: url('https://images.icon-icons.com/2552/PNG/512/safari_ios_browser_logo_icon_152966.png');
+            background-image: url('icons/safari.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -399,7 +400,7 @@
         .icon.safari i { display: none; }
         .icon.weather { 
             background: #007AFF; 
-            background-image: url('https://cdn.jim-nielsen.com/ios/1024/weather-2025-10-20.png?rf=1024');
+            background-image: url('icons/weather.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -407,7 +408,7 @@
         .icon.weather i { display: none; }
         .icon.settings { 
             background: #8E8E93; 
-            background-image: url('https://r2.image-upload.app/ptImg/VH2EULVh.png');
+            background-image: url('icons/settings.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -415,7 +416,7 @@
         .icon.settings i { display: none; }
         .icon.phone { 
             background: #28CD41; 
-            background-image: url('https://cdn.jim-nielsen.com/ios/1024/phone-2025-10-20.png?rf=1024');
+            background-image: url('icons/phone.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -423,7 +424,7 @@
         .icon.phone i { display: none; }
         .icon.messages { 
             background: #28CD41; 
-            background-image: url('https://cdn.jim-nielsen.com/ios/1024/messages-2025-10-20.png?rf=1024');
+            background-image: url('icons/messages.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -432,7 +433,7 @@
         .icon.music { background: #FF2D55; }
         .icon.photos { 
             background: #fff; 
-            background-image: url('https://cdn.jim-nielsen.com/ios/1024/photos-2025-10-20.png?rf=1024');
+            background-image: url('icons/photos.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -440,7 +441,7 @@
         .icon.photos i { display: none; }
         .icon.camera { 
             background: #AEAEB2; 
-            background-image: url('https://cdn.jim-nielsen.com/ios/1024/camera-2025-10-20.png?rf=1024');
+            background-image: url('icons/camera.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -448,7 +449,7 @@
         .icon.camera i { display: none; }
         .icon.appstore { 
             background: #007AFF; 
-            background-image: url('https://cdn.jim-nielsen.com/ios/1024/app-store-connect-2025-10-27.png?rf=1024');
+            background-image: url('icons/appstore.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -456,7 +457,7 @@
         .icon.appstore i { display: none; }
         .icon.wechat { 
             background: #07C160; 
-            background-image: url('https://r2.image-upload.app/ptImg/lOlR8NT1.png');
+            background-image: url('icons/wechat.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -464,7 +465,7 @@
         .icon.wechat i { display: none; }
         .icon.calculator { 
             background: #FF9500; 
-            background-image: url('https://r2.image-upload.app/ptImg/fG3VllUI.png');
+            background-image: url('icons/calculator.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -472,7 +473,7 @@
         .icon.calculator i { display: none; }
         .icon.notes { 
             background: #FFCC00; 
-            background-image: url('https://cdn.jim-nielsen.com/ios/1024/notes-2025-10-20.png?rf=1024');
+            background-image: url('icons/notes.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -480,7 +481,7 @@
         .icon.notes i { display: none; }
         .icon.clock { 
             background: #000; 
-            background-image: url('https://cdn.jim-nielsen.com/ios/1024/clock-2025-05-15.png?rf=1024');
+            background-image: url('icons/clock.png');
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
@@ -499,6 +500,22 @@
 
         .jiggle-mode .app-icon {
             animation: jiggle 0.28s infinite ease-in-out;
+        }
+
+        /* 在抖动模式下隐藏应用网格的滚动条，防止因图标抖动造成尺寸微小变化导致滚动条频繁闪烁 */
+        .jiggle-mode .apps-grid-container {
+            overflow-y: auto !important; /* 恢复滚动，允许拖拽时滚动 */
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        .jiggle-mode .apps-grid-container::-webkit-scrollbar {
+            display: none !important;
+        }
+
+        /* 确保主屏幕在编辑模式下依然可以正常布局，但不显示溢出滚动条 */
+        .jiggle-mode .home-screen {
+            /* 移除之前的 overflow: hidden，防止限制全屏拖拽 */
         }
 
         .delete-btn {
@@ -546,20 +563,49 @@
             display: flex;
         }
 
+        /* --- 拖拽样式 (SortableJS) --- */
+        .sortable-ghost {
+            opacity: 0.1 !important;
+            transform: scale(0.8) !important;
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-radius: 20%;
+        }
+        
+        .sortable-drag {
+            opacity: 0 !important; /* 拖拽时隐藏原位置图标 */
+        }
+        
+        .sortable-fallback {
+            opacity: 0.9 !important;
+            transform: scale(1.15) !important;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
+            cursor: grabbing !important;
+            z-index: 10000 !important;
+            pointer-events: none !important;
+            transition: transform 0.1s ease !important;
+        }
+
+        /* 解决 Dock 栏在替换瞬间的布局抖动 */
+        .dock:has(> :nth-child(5)) {
+            max-width: 380px !important;
+            transition: none !important;
+        }
+
         #app-appstore {
             background-color: #f2f2f7;
             display: flex;
             flex-direction: column;
             color: #000;
-            overflow-y: auto; /* 允许纵向滚动 */
-            -webkit-overflow-scrolling: touch; /* 移动端平滑滚动 */
-            align-items: center; /* 桌面端居中内容 */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            align-items: center;
         }
 
         .appstore-header, .appstore-list {
             width: 100%;
-            max-width: 800px; /* 限制最大宽度，防止横向拉伸过长 */
+            max-width: 900px; /* 稍微增加宽度以利用大屏 */
             margin: 0 auto;
+            box-sizing: border-box;
         }
 
         .dark-mode #app-appstore {
@@ -568,77 +614,105 @@
         }
 
         .appstore-header {
-            padding: 60px 20px 20px;
+            padding: calc(40px + env(safe-area-inset-top, 20px)) 20px 15px;
             position: sticky;
             top: 0;
             background: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             z-index: 10;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
         }
 
         .dark-mode .appstore-header {
             background: rgba(0, 0, 0, 0.8);
+            border-bottom-color: rgba(255, 255, 255, 0.1);
         }
 
         .appstore-header h1 {
-            font-size: 34px;
+            font-size: 32px;
             font-weight: 700;
             margin: 0;
+            letter-spacing: -0.5px;
         }
 
         .appstore-list {
-            padding: 0 20px;
+            padding: 15px 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: clamp(15px, 2vw, 30px);
+            /* 使用更智能的网格，确保在极小屏下自动切换为单列 */
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
+            gap: 16px;
         }
 
         .appstore-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 16px;
-            border-bottom: none;
+            gap: 14px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 14px;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .appstore-item:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.8);
         }
 
         .dark-mode .appstore-item {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .dark-mode .appstore-item:active {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .appstore-icon {
-            width: 60px;
-            height: 60px;
+            width: 58px;
+            height: 58px;
             border-radius: 12px;
+            flex-shrink: 0;
             background-size: cover;
             background-position: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .appstore-info {
             flex: 1;
+            min-width: 0; /* 允许 flex 子项收缩以实现文本省略 */
         }
 
         .appstore-name {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 600;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .appstore-desc {
-            font-size: 13px;
+            font-size: 12px;
             color: #8e8e93;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .appstore-get-btn {
             background: #007aff;
             color: #fff;
-            padding: 6px 16px;
-            border-radius: 15px;
+            padding: 6px 20px;
+            border-radius: 20px;
             font-size: 14px;
             font-weight: 700;
             border: none;
             cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            min-width: 64px;
+            text-align: center;
         }
 
         .appstore-get-btn.installed {
@@ -1673,18 +1747,44 @@
 
         .dock {
             width: 100%;
-            max-width: 360px;
+            max-width: 320px; /* Reduced from 360px for tighter spacing */
             padding: 12px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px) saturate(210%);
             -webkit-backdrop-filter: blur(20px) saturate(210%);
             border-radius: 28px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 16px; /* Explicit gap for items < 4 */
             box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--glass-border);
             border: none;
             transform: translateZ(0);
+            transition: max-width 0.4s var(--spring-easing), padding 0.4s var(--spring-easing);
+            margin: 0 auto;
+        }
+
+        .dock .app-icon {
+            flex-shrink: 0;
+            width: 60px;
+        }
+
+        .dock .app-icon span {
+            display: none; /* Dock 栏图标不显示文字 */
+        }
+
+        /* 动态调整 Dock 宽度，配合 Sortable.js 的 DOM 变化 */
+        .dock:has(> :nth-child(1):last-child) {
+            max-width: 84px; /* 60px + 12px*2 padding */
+        }
+        .dock:has(> :nth-child(2):last-child) {
+            max-width: 160px; /* 60px*2 + 16px gap + 12px*2 padding */
+        }
+        .dock:has(> :nth-child(3):last-child) {
+            max-width: 236px; /* 60px*3 + 16px*2 gap + 12px*2 padding */
+        }
+        .dock:has(> :nth-child(4):last-child) {
+            max-width: 320px; /* Tighter original width */
+            justify-content: space-between; /* 恢复原有的间距分布 */
         }
 
         .dark-mode .dock {
@@ -1751,36 +1851,49 @@
         }
 
         .safari-nav {
-            padding: 12px 16px;
-            padding-top: calc(12px + env(safe-area-inset-top));
-            background: var(--app-header-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            padding: 10px 16px;
+            padding-top: calc(8px + env(safe-area-inset-top, 20px));
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             display: flex;
             align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+            z-index: 10;
         }
 
-        .nav-center {
-            flex: 1; /* 让地址栏占据中间所有空间 */
+        .safari-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
         }
 
-        #url-input-wrapper {
-            width: 100%; /* 占据父容器宽度 */
-            background: rgba(0, 0, 0, 0.04);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
+        .safari-btn:active {
+            opacity: 0.5;
+        }
+
+        .safari-url-bar {
+            flex: 1;
             height: 36px;
-            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 8px;
+            transition: background 0.3s ease;
         }
 
-        .dark-mode #url-input-wrapper {
-            background: rgba(255, 255, 255, 0.08);
+        .dark-mode .safari-url-bar {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         #url-input {
@@ -1788,46 +1901,78 @@
             background: transparent;
             border: none;
             color: var(--text-color);
-            font-size: 14px;
+            font-size: 15px;
             text-align: center;
-            font-weight: 500;
             outline: none;
+            width: 100%;
+            font-family: inherit;
         }
 
-        .url-btn {
-            background: transparent;
+        .safari-refresh-btn {
+            background: none;
             border: none;
             color: var(--secondary-text-color);
-            font-size: 14px;
+            font-size: 12px;
             cursor: pointer;
-            padding: 6px;
-            border-radius: 50%;
-            transition: all 0.2s;
+            opacity: 0.6;
         }
 
-        .url-btn:hover {
-            background: rgba(0, 0, 0, 0.05);
+        .safari-footer {
+            padding: 10px 20px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 15px));
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .footer-btn {
+            background: none;
+            border: none;
             color: var(--accent-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .footer-btn:active {
+            opacity: 0.5;
+        }
+
+        .dark-mode .safari-nav, 
+        .dark-mode .safari-footer {
+            background: rgba(28, 28, 30, 0.85);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         #safari-frame {
             width: 100%;
-            height: 100%;
+            height: calc(100% - 110px); /* 减去顶部和底部导航栏高度 */
             border: none;
             background-color: #fff;
+            margin-top: 0;
         }
 
-        /* 加载条样式 */
+        /* 极致简约的加载条 */
         .loading-bar {
-            height: 3px;
+            height: 2px;
             background: var(--accent-color);
             position: absolute;
-            top: 0;
+            top: calc(54px + env(safe-area-inset-top, 20px));
             left: 0;
             width: 0;
             z-index: 1000;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 113, 227, 0.5);
+            transition: width 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
         }
 
         .loading-bar.active {
@@ -2590,6 +2735,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 30; /* 确保在最上层 */
+            position: relative;
         }
 
         .shutter-inner {
@@ -2599,6 +2746,7 @@
             border: 2px solid #000;
             background: white;
             transition: all 0.2s ease;
+            pointer-events: none; /* 让事件穿透到父元素 shutter-button */
         }
 
         #shutter-button:active {
@@ -5091,6 +5239,84 @@
             position: relative;
         }
 
+        /* 微信 + 号功能面板样式 */
+        .wechat-plus-panel {
+            display: none;
+            background: #f7f7f7;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 25px 20px calc(25px + env(safe-area-inset-bottom, 20px));
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px 15px;
+            transform-origin: bottom;
+            z-index: 101;
+        }
+
+        .wechat-plus-panel.active {
+            display: grid;
+            animation: wechatPanelSlideUp 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes wechatPanelSlideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .plus-panel-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .plus-panel-item:active {
+            transform: scale(0.95);
+        }
+
+        .plus-panel-icon {
+            width: 64px;
+            height: 64px;
+            background: #ffffff;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: background 0.2s;
+        }
+
+        .plus-panel-item:active .plus-panel-icon {
+            background: #ebebeb;
+        }
+
+        .plus-panel-item span {
+            font-size: 12px;
+            color: #7a7a7a;
+            font-weight: 400;
+        }
+
+        /* 暗黑模式适配 */
+        .dark-mode .wechat-plus-panel {
+            background: #1c1c1e;
+            border-top-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .dark-mode .plus-panel-icon {
+            background: #2c2c2e;
+            color: #eee;
+        }
+
+        .dark-mode .plus-panel-item span {
+            color: #8e8e93;
+        }
+
+        .dark-mode .plus-panel-item:active .plus-panel-icon {
+            background: #3a3a3c;
+        }
+
         .wechat-input-btn:hover {
             color: #1d1d1f; /* 悬停时颜色加深，而非加背景框 */
         }
@@ -6613,24 +6839,28 @@
                 <div class="icon phone">
                     <i class="fas fa-phone"></i>
                 </div>
+                <span>电话</span>
             </div>
             <div class="app-icon" data-app="safari">
                 <div class="delete-btn" onclick="deleteApp(event, 'safari')"><i class="fas fa-times"></i></div>
                 <div class="icon safari">
                     <i class="fab fa-safari"></i>
                 </div>
+                <span>Safari</span>
             </div>
             <div class="app-icon" data-app="messages">
                 <div class="delete-btn" onclick="deleteApp(event, 'messages')"><i class="fas fa-times"></i></div>
                 <div class="icon messages">
                     <i class="fas fa-comment"></i>
                 </div>
+                <span>信息</span>
             </div>
             <div class="app-icon" data-app="music">
                 <div class="delete-btn" onclick="deleteApp(event, 'music')"><i class="fas fa-times"></i></div>
                 <div class="icon music">
                     <i class="fas fa-music"></i>
                 </div>
+                <span>音乐</span>
             </div>
         </div>
     </div>
@@ -6638,28 +6868,24 @@
     <!-- 应用页面 -->
     <div class="app-page" id="app-safari">
         <div class="safari-nav">
-            <div class="nav-left">
-                <button class="header-btn" onclick="closeApps()"><i class="fas fa-chevron-left"></i></button>
+            <button class="safari-btn" onclick="closeApps()" title="退出"><i class="fas fa-times"></i></button>
+            <div class="safari-url-bar">
+                <i class="fas fa-lock" style="font-size: 10px; opacity: 0.5;"></i>
+                <input type="text" id="url-input" value="m.sogou.com" spellcheck="false">
+                <button class="safari-refresh-btn" onclick="reloadPage()"><i class="fas fa-redo-alt"></i></button>
             </div>
-            <div class="nav-center">
-                <div id="url-input-wrapper">
-                    <div class="url-input-left">
-                        <i class="fas fa-globe"></i>
-                    </div>
-                    <input type="text" id="url-input" value="m.sogou.com">
-                    <div class="url-input-right">
-                        <button class="url-btn" onclick="reloadPage()"><i class="fas fa-sync-alt"></i></button>
-                        <button class="url-btn" onclick="goHome()"><i class="fas fa-home"></i></button>
-                    </div>
-                </div>
-            </div>
-            <div class="nav-right">
-                <button class="header-btn" onclick="toggleBrowserMenu()"><i class="fas fa-ellipsis-v"></i></button>
-            </div>
+            <button class="safari-btn" onclick="toggleBrowserMenu()" title="更多"><i class="fas fa-ellipsis-h"></i></button>
         </div>
         <div class="loading-bar" id="loading-bar"></div>
         <div class="app-content">
-            <iframe id="safari-frame" sandbox="allow-forms allow-scripts allow-same-origin allow-popups" style="width: 100%; height: 100%; transform-origin: top left;"></iframe>
+            <iframe id="safari-frame" sandbox="allow-forms allow-scripts allow-same-origin allow-popups" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+        <div class="safari-footer">
+            <button class="footer-btn" onclick="goBack()"><i class="fas fa-chevron-left"></i></button>
+            <button class="footer-btn" onclick="goForward()"><i class="fas fa-chevron-right"></i></button>
+            <button class="footer-btn" onclick="goHome()"><i class="fas fa-home"></i></button>
+            <button class="footer-btn" onclick="toggleBrowserMenu()"><i class="far fa-bookmark"></i></button>
+            <button class="footer-btn" onclick="closeApps()"><i class="far fa-window-restore"></i></button>
         </div>
     </div>
 
@@ -6674,7 +6900,7 @@
         <div class="appstore-list" id="appstore-list">
             <!-- 动态生成应用列表 -->
         </div>
-        <div style="height: 100px;"></div> <!-- 底部留白 -->
+        <div style="height: calc(100px + env(safe-area-inset-bottom, 20px));"></div> <!-- 底部留白，适配安全区 -->
     </div>
 
     <div class="app-page" id="app-weather">
@@ -7440,17 +7666,40 @@
                 <button class="notes-editor-btn" onclick="saveNote()" style="font-weight: 600;">完成</button>
             </div>
             <textarea class="notes-editor-content" id="note-content" placeholder="开始输入..."></textarea>
-            <div class="notes-editor-footer">
-                <button class="notes-editor-btn" id="notes-delete-btn" onclick="deleteNote()" style="color: #ff3b30; display: none;">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-                <div style="flex: 1;"></div>
-                <button class="notes-editor-btn" style="color: #ffcc00;">
-                    <i class="fas fa-share-square"></i>
-                </button>
+        </div>
+    </div>
+
+    <!-- 备忘录删除二次确认弹窗 -->
+    <div class="clock-modal-overlay" id="notes-delete-confirm-overlay" style="background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: opacity 0.3s ease;">
+        <div class="clock-modal-content" style="border-radius: 20px; width: 280px; margin: auto; padding: 0; overflow: hidden; background: rgba(255, 255, 255, 0.9); transform: scale(1.1); opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;">
+            <div style="padding: 24px 20px 20px; text-align: center;">
+                <h3 style="margin: 0; color: #000; font-size: 17px; font-weight: 600; line-height: 1.3;">删除备忘录</h3>
+                <p style="color: #333; font-size: 13px; margin: 4px 0 0; line-height: 1.4;">确定要删除这条备忘录吗？</p>
+            </div>
+            <div style="display: flex; border-top: 0.5px solid rgba(0,0,0,0.15);">
+                <button onclick="closeNotesDeleteModal()" style="flex: 1; background: transparent; color: #007aff; padding: 12px; border: none; font-size: 17px; font-weight: 400; cursor: pointer; border-right: 0.5px solid rgba(0,0,0,0.15); outline: none;">取消</button>
+                <button id="notes-confirm-delete-btn" style="flex: 1; background: transparent; color: #ff3b30; padding: 12px; border: none; font-size: 17px; font-weight: 600; cursor: pointer; outline: none;">删除</button>
             </div>
         </div>
     </div>
+
+    <style>
+        .dark-mode #notes-delete-confirm-overlay .clock-modal-content {
+            background: rgba(30, 30, 30, 0.9) !important;
+        }
+        .dark-mode #notes-delete-confirm-overlay h3 {
+            color: #fff !important;
+        }
+        .dark-mode #notes-delete-confirm-overlay p {
+            color: #eee !important;
+        }
+        .dark-mode #notes-delete-confirm-overlay div {
+            border-color: rgba(255,255,255,0.1) !important;
+        }
+        .dark-mode #notes-delete-confirm-overlay button {
+            border-color: rgba(255,255,255,0.1) !important;
+        }
+    </style>
 
     <!-- 微信应用 -->
     <div class="app-page" id="app-wechat">
@@ -7685,31 +7934,179 @@
             </div>
             
             <!-- 红包发送模态框 -->
-            <div class="wechat-modal" id="wechat-redpacket-modal">
-                <div class="wechat-modal-content">
-                    <div class="wechat-modal-header">
-                        <h2>发红包</h2>
-                        <button class="wechat-close-btn">&times;</button>
+            <div class="wechat-modal wechat-redpacket-view" id="wechat-redpacket-modal">
+                <div class="wechat-redpacket-container">
+                    <div class="redpacket-header">
+                        <button class="redpacket-close-btn" id="redpacket-cancel-btn">取消</button>
+                        <h2 class="redpacket-title">发红包</h2>
                     </div>
-                    <div class="wechat-modal-body">
-                        <div class="wechat-form-group">
-                            <label for="redpacket-amount">红包金额</label>
-                            <input type="number" id="redpacket-amount" placeholder="请输入金额" min="0.01" step="0.01">
+                    
+                    <div class="redpacket-form">
+                        <div class="redpacket-input-group">
+                            <div class="redpacket-input-item">
+                                <span class="redpacket-label">金额</span>
+                                <input type="number" id="redpacket-amount" placeholder="0.00" min="0.01" step="0.01">
+                                <span class="redpacket-unit">元</span>
+                            </div>
                         </div>
-                        <div class="wechat-form-group">
-                            <label for="redpacket-msg">红包留言</label>
-                            <input type="text" id="redpacket-msg" placeholder="恭喜发财，大吉大利">
+                        <div class="redpacket-tip">当前可用余额 <span id="redpacket-balance">¥0.00</span></div>
+
+                        <div class="redpacket-msg-group">
+                            <textarea id="redpacket-msg" placeholder="恭喜发财，大吉大利"></textarea>
                         </div>
-                        <div class="withdraw-limit">
-                            <p>可用余额: <span id="redpacket-balance">¥0.00</span></p>
+
+                        <div class="redpacket-total-display">
+                            <span class="currency">¥</span><span class="total-num" id="redpacket-total-show">0.00</span>
                         </div>
-                    </div>
-                    <div class="wechat-modal-footer">
-                        <button class="secondary" id="redpacket-cancel-btn">取消</button>
-                        <button id="redpacket-send-btn">发红包</button>
+
+                        <button class="redpacket-submit-btn" id="redpacket-send-btn">塞钱进红包</button>
                     </div>
                 </div>
             </div>
+
+            <style>
+                /* 微信原生红包样式 - 独立类名防冲突 */
+                .wechat-redpacket-view {
+                    background: #f1f1f1 !important;
+                    z-index: 2000 !important;
+                }
+                .wechat-redpacket-view .wechat-redpacket-container {
+                    width: 100%;
+                    height: 100%;
+                    background: #f1f1f1;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .redpacket-header {
+                    padding: 12px 16px;
+                    display: flex;
+                    align-items: center;
+                    background: #f1f1f1;
+                    position: relative;
+                }
+                .redpacket-close-btn {
+                    background: none;
+                    border: none;
+                    font-size: 16px;
+                    color: #000;
+                    cursor: pointer;
+                    z-index: 1;
+                }
+                .redpacket-title {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    text-align: center;
+                    font-size: 17px;
+                    font-weight: 600;
+                    margin: 0;
+                }
+                .redpacket-form {
+                    padding: 20px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+                .redpacket-input-group {
+                    background: #fff;
+                    border-radius: 8px;
+                    padding: 15px;
+                }
+                .redpacket-input-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .redpacket-label {
+                    font-size: 16px;
+                    color: #000;
+                    flex-shrink: 0;
+                }
+                .redpacket-input-item input {
+                    flex: 1;
+                    border: none;
+                    text-align: right;
+                    font-size: 16px;
+                    outline: none;
+                    background: transparent;
+                }
+                .redpacket-unit {
+                    font-size: 16px;
+                    color: #000;
+                    flex-shrink: 0;
+                }
+                .redpacket-tip {
+                    font-size: 12px;
+                    color: #888;
+                    padding: 8px 16px 0;
+                }
+                .redpacket-msg-group {
+                    background: #fff;
+                    border-radius: 8px;
+                    padding: 15px;
+                }
+                .redpacket-msg-group textarea {
+                    width: 100%;
+                    border: none;
+                    font-size: 16px;
+                    outline: none;
+                    resize: none;
+                    height: 60px;
+                    font-family: inherit;
+                }
+                .redpacket-total-display {
+                    text-align: center;
+                    margin: 40px 0;
+                }
+                .redpacket-total-display .currency {
+                    font-size: 24px;
+                    font-weight: 600;
+                    margin-right: 5px;
+                }
+                .redpacket-total-display .total-num {
+                    font-size: 48px;
+                    font-weight: 600;
+                }
+                .redpacket-submit-btn {
+                    background: #fa5151;
+                    color: #fff;
+                    border: none;
+                    border-radius: 8px;
+                    padding: 12px;
+                    font-size: 17px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+                .redpacket-submit-btn:active {
+                    background: #d44747;
+                }
+                .redpacket-submit-btn:disabled {
+                    background: #feb3b3;
+                    cursor: not-allowed;
+                }
+                .dark-mode .wechat-redpacket-view,
+                .dark-mode .wechat-redpacket-container,
+                .dark-mode .redpacket-header {
+                    background: #191919 !important;
+                }
+                .dark-mode .redpacket-input-group,
+                .dark-mode .redpacket-msg-group {
+                    background: #232323;
+                }
+                .dark-mode .redpacket-title,
+                .dark-mode .redpacket-close-btn,
+                .dark-mode .redpacket-label,
+                .dark-mode .redpacket-unit,
+                .dark-mode .redpacket-total-display {
+                    color: #fff;
+                }
+                .dark-mode .redpacket-amount-input input,
+                .dark-mode .redpacket-msg-group textarea {
+                    background: transparent;
+                    color: #fff;
+                }
+            </style>
             
             <!-- 表情选择器 -->
             <div class="wechat-emoji-picker" id="wechat-emoji-picker">
@@ -7998,8 +8395,27 @@
                     <i class="fas fa-image"></i>
                 </button>
                 <button id="wechat-more-btn" class="wechat-input-btn">
-                    <i class="fas fa-ellipsis-h"></i>
+                    <i class="fas fa-plus-circle"></i>
                 </button>
+            </div>
+            <!-- 微信 + 号功能面板 -->
+            <div class="wechat-plus-panel" id="wechat-plus-panel">
+                <div class="plus-panel-item" id="plus-panel-photo">
+                    <div class="plus-panel-icon"><i class="fas fa-image"></i></div>
+                    <span>照片</span>
+                </div>
+                <div class="plus-panel-item" id="plus-panel-camera">
+                    <div class="plus-panel-icon"><i class="fas fa-camera"></i></div>
+                    <span>拍摄</span>
+                </div>
+                <div class="plus-panel-item" id="plus-panel-redpacket">
+                    <div class="plus-panel-icon"><i class="fas fa-envelope"></i></div>
+                    <span>红包</span>
+                </div>
+                <div class="plus-panel-item" id="plus-panel-transfer">
+                    <div class="plus-panel-icon"><i class="fas fa-wallet"></i></div>
+                    <span>转账</span>
+                </div>
             </div>
         </div>
     </div>
@@ -8307,6 +8723,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script>
         // --- 全局稳定性增强：防止各种不可预见的异常导致应用崩溃 ---
         (function() {
@@ -8450,6 +8867,7 @@
                     deletedApps = currentDeleted; // 更新闭包变量
                     localStorage.setItem('deletedApps', JSON.stringify(deletedApps));
                     
+                    restoreAppLayout();
                     initAppIcons();
                     if (activeApp === 'appstore') renderAppStore();
                 }
@@ -8466,6 +8884,7 @@
                 localStorage.setItem('deletedApps', JSON.stringify(deletedApps));
                 
                 // 2. 立即更新主屏幕图标显示
+                restoreAppLayout();
                 initAppIcons();
                 
                 // 3. 模拟安装动画反馈
@@ -8541,6 +8960,146 @@
                 clearTimeout(longPressTimer);
             }
 
+            let gridSortable, dockSortable;
+
+            // 保存应用布局
+            function saveAppLayout() {
+                const gridEl = document.querySelector('.apps-grid');
+                const dockEl = document.querySelector('.dock');
+                if (!gridEl || !dockEl) return;
+                
+                const gridOrder = Array.from(gridEl.children)
+                    .filter(el => el.dataset.app || el.classList.contains('widget'))
+                    .map(el => ({
+                        id: el.dataset.app || 'widget-main',
+                        isWidget: el.classList.contains('widget')
+                    }));
+                
+                const dockOrder = Array.from(dockEl.children)
+                    .filter(el => el.dataset.app)
+                    .map(el => el.dataset.app);
+                
+                localStorage.setItem('appLayout_grid', JSON.stringify(gridOrder));
+                localStorage.setItem('appLayout_dock', JSON.stringify(dockOrder));
+            }
+
+            // 恢复应用布局
+            function restoreAppLayout() {
+                const gridEl = document.querySelector('.apps-grid');
+                const dockEl = document.querySelector('.dock');
+                if (!gridEl || !dockEl) return;
+
+                const gridOrder = JSON.parse(localStorage.getItem('appLayout_grid'));
+                const dockOrder = JSON.parse(localStorage.getItem('appLayout_dock'));
+                
+                if (!gridOrder && !dockOrder) return;
+
+                // 获取所有可移动元素
+                const gridItems = Array.from(gridEl.children);
+                const dockItems = Array.from(dockEl.children);
+                const allItems = [...gridItems, ...dockItems];
+                
+                const itemMap = {};
+                allItems.forEach(item => {
+                    const id = item.dataset.app || (item.classList.contains('widget') ? 'widget-main' : null);
+                    if (id) itemMap[id] = item;
+                });
+
+                if (gridOrder) {
+                    gridOrder.forEach(info => {
+                        const id = typeof info === 'string' ? info : info.id;
+                        if (itemMap[id]) {
+                            gridEl.appendChild(itemMap[id]);
+                        }
+                    });
+                }
+
+                if (dockOrder) {
+                    dockOrder.forEach(appId => {
+                        if (itemMap[appId]) {
+                            dockEl.appendChild(itemMap[appId]);
+                        }
+                    });
+                }
+            }
+
+            function initDragAndDrop() {
+                const gridEl = document.querySelector('.apps-grid');
+                const dockEl = document.querySelector('.dock');
+
+                if (typeof Sortable === 'undefined') return;
+
+                gridSortable = new Sortable(gridEl, {
+                    group: 'apps',
+                    animation: 150,
+                    disabled: true,
+                    easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    filter: '.widget',
+                    preventOnFilter: false,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    forceFallback: true,
+                    fallbackClass: 'sortable-fallback',
+                    fallbackOnBody: true,
+                    fallbackTolerance: 0, 
+                    swapThreshold: 0.5,
+                    invertedSwapThreshold: 0.5,
+                    scroll: true,
+                    scrollSensitivity: 50,
+                    onEnd: saveAppLayout, // 拖拽结束保存布局
+                    onMove: function (evt) {
+                        if (evt.dragged.classList.contains('widget') && evt.to === dockEl) {
+                            return false;
+                        }
+                    }
+                });
+
+                dockSortable = new Sortable(dockEl, {
+                    group: {
+                        name: 'apps',
+                        put: true
+                    },
+                    animation: 150,
+                    disabled: true,
+                    direction: 'horizontal',
+                    easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    forceFallback: true,
+                    fallbackClass: 'sortable-fallback',
+                    fallbackOnBody: true,
+                    fallbackTolerance: 0,
+                    swapThreshold: 0.5,
+                    invertedSwapThreshold: 0.5,
+                    onEnd: saveAppLayout, // 拖拽结束保存布局
+                    onAdd: function (evt) {
+                        if (dockEl.children.length > 4) {
+                            const icons = Array.from(dockEl.children);
+                            let displacedIcon;
+                            if (evt.item === icons[icons.length - 1]) {
+                                displacedIcon = icons[icons.length - 2];
+                            } else {
+                                displacedIcon = icons[icons.length - 1];
+                            }
+                            
+                            if (displacedIcon) {
+                                gridEl.appendChild(displacedIcon);
+                            }
+                        }
+                        saveAppLayout(); // 添加元素后保存
+                    },
+                    onRemove: saveAppLayout, // 移除元素后保存
+                    onMove: function (evt) {
+                        if (evt.from === dockEl && evt.to !== dockEl && dockEl.children.length <= 1) {
+                            return false;
+                        }
+                    }
+                });
+            }
+
+            // 在页面加载后初始化拖拽
+            setTimeout(initDragAndDrop, 1000);
+
             function enterJiggleMode() {
                 jiggleMode = true;
                 document.body.classList.add('jiggle-mode');
@@ -8549,6 +9108,10 @@
                 document.querySelectorAll('.app-icon').forEach(icon => {
                     icon.style.animationDelay = (Math.random() * -0.5) + 's';
                 });
+
+                // 启用拖拽
+                if (gridSortable) gridSortable.option('disabled', false);
+                if (dockSortable) dockSortable.option('disabled', false);
 
                 // 点击背景（home-screen）退出抖动模式
                 const exitHandler = (e) => {
@@ -8570,8 +9133,13 @@
                 document.querySelectorAll('.app-icon').forEach(icon => {
                     icon.style.animationDelay = '';
                 });
+
+                // 禁用拖拽
+                if (gridSortable) gridSortable.option('disabled', true);
+                if (dockSortable) dockSortable.option('disabled', true);
             }
 
+            restoreAppLayout();
             initAppIcons();
             
             let activeApp = null;
@@ -9355,7 +9923,16 @@
                     
                     // 确保视频开始播放
                     try {
-                        await cameraViewfinder.play();
+                        const playPromise = cameraViewfinder.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.warn("Video play prevented, waiting for user interaction:", error);
+                                // 这种情况下，用户可能需要点击取景器来开始播放
+                                cameraViewfinder.addEventListener('click', () => {
+                                    cameraViewfinder.play();
+                                }, { once: true });
+                            });
+                        }
                     } catch (playErr) {
                         console.warn("Video play interrupted:", playErr);
                     }
@@ -9424,45 +10001,51 @@
             }
             
             // 初始化相机事件监听
-            document.addEventListener('DOMContentLoaded', function() {
-                // 拍照按钮
-                const shutterBtn = document.getElementById('shutter-button');
-                if (shutterBtn) {
-                    const handleCapture = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        takePhoto();
-                    };
-                    shutterBtn.addEventListener('click', handleCapture);
-                    shutterBtn.addEventListener('touchstart', handleCapture, { passive: false });
-                }
+            // 拍照按钮
+            const shutterBtn = document.getElementById('shutter-button');
+            if (shutterBtn) {
+                const handleCapture = (e) => {
+                    // 只有在点击或触摸时触发
+                    if (e.type === 'touchstart') {
+                        // 如果是触摸事件，防止触发后续的 click 事件
+                        // 但不要在所有情况下都 preventDefault，以免影响 CSS :active 状态
+                        // e.preventDefault(); 
+                    }
+                    e.stopPropagation();
+                    takePhoto();
+                };
+                
+                // 使用 click 作为主要触发方式，它在移动端也有很好的支持（虽然有延迟，但对于拍照按钮通常可以接受）
+                // 或者我们可以使用 pointerdown 来获得更快的响应
+                shutterBtn.addEventListener('click', handleCapture);
+                // 暂时移除 touchstart 以避免双重触发或冲突，click 在移动端通常足够
+            }
 
-                // 切换相机按钮
-                const cameraSwitchBtn = document.getElementById('camera-switch-btn');
-                if (cameraSwitchBtn) {
-                    cameraSwitchBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        switchCamera();
-                    });
-                }
+            // 切换相机按钮
+            const cameraSwitchBtn = document.getElementById('camera-switch-btn');
+            if (cameraSwitchBtn) {
+                cameraSwitchBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    switchCamera();
+                });
+            }
 
-                // 打开相册按钮
-                const galleryBtn = document.getElementById('camera-gallery-btn');
-                if (galleryBtn) {
-                    galleryBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        openApp('photos');
-                    });
-                }
+            // 打开相册按钮
+            const galleryBtn = document.getElementById('camera-gallery-btn');
+            if (galleryBtn) {
+                galleryBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openApp('photos');
+                });
+            }
 
-                // 模式选择
-                const modeOptions = document.querySelectorAll('#camera-mode-selector .mode-option');
-                modeOptions.forEach(option => {
-                    option.addEventListener('click', () => {
-                        modeOptions.forEach(opt => opt.classList.remove('active'));
-                        option.classList.add('active');
-                        cameraMode = option.dataset.mode;
-                    });
+            // 模式选择
+            const modeOptions = document.querySelectorAll('#camera-mode-selector .mode-option');
+            modeOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    modeOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    cameraMode = option.dataset.mode;
                 });
             });
 
@@ -9485,6 +10068,15 @@
             }
             // 初始化照片应用数据库
             initDB();
+            
+            // 确保在数据库初始化完成后尝试更新预览
+            const checkDBInterval = setInterval(() => {
+                if (db) {
+                    updateCameraGalleryPreview();
+                    clearInterval(checkDBInterval);
+                }
+            }, 500);
+            setTimeout(() => clearInterval(checkDBInterval), 5000); // 最多检查5秒
             addPhotosBtn.addEventListener('click', () => photoFileInput.click());
             photoFileInput.addEventListener('change', (e) => {
                 const files = e.target.files;
@@ -9618,10 +10210,15 @@
                 try {
                     if (!cameraStream) {
                         console.error('相机未准备好');
+                        alert('相机未准备好，请稍候或检查相机权限。');
                         return;
                     }
 
                     const cameraViewfinder = document.getElementById('camera-viewfinder');
+                    if (!cameraViewfinder) {
+                        alert('找不到取景器元素。');
+                        return;
+                    }
                     const canvas = document.createElement('canvas');
                     
                     // 解决某些浏览器下 videoWidth 为 0 的问题
@@ -9724,6 +10321,38 @@
                     document.body.removeChild(modal);
                 });
                 
+                // 下载按钮
+                const downloadBtn = document.createElement('button');
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+                downloadBtn.style.position = 'absolute';
+                downloadBtn.style.bottom = '20px';
+                downloadBtn.style.left = '50%';
+                downloadBtn.style.transform = 'translateX(-50%)';
+                downloadBtn.style.width = '50px';
+                downloadBtn.style.height = '50px';
+                downloadBtn.style.border = 'none';
+                downloadBtn.style.borderRadius = '50%';
+                downloadBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                downloadBtn.style.color = '#fff';
+                downloadBtn.style.fontSize = '20px';
+                downloadBtn.style.display = 'flex';
+                downloadBtn.style.alignItems = 'center';
+                downloadBtn.style.justifyContent = 'center';
+                downloadBtn.style.cursor = 'pointer';
+                downloadBtn.style.transition = 'all 0.3s ease';
+                
+                downloadBtn.addEventListener('mouseenter', () => {
+                    downloadBtn.style.background = 'rgba(255, 255, 255, 0.3)';
+                });
+                
+                downloadBtn.addEventListener('mouseleave', () => {
+                    downloadBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                });
+
+                downloadBtn.addEventListener('click', () => {
+                    savePhotoToLocal(photoData);
+                });
+                
                 // 点击模态框背景关闭
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
@@ -9733,6 +10362,7 @@
                 
                 modal.appendChild(img);
                 modal.appendChild(closeBtn);
+                modal.appendChild(downloadBtn);
                 document.body.appendChild(modal);
             }
 
@@ -14147,14 +14777,13 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
             }
 
             // 头像上传处理
-            document.addEventListener('DOMContentLoaded', () => {
-                // 新建角色页面的头像预览点击事件
-                const createAvatarPreview = document.getElementById('wechat-create-avatar-preview');
-                if (createAvatarPreview) {
-                    createAvatarPreview.addEventListener('click', () => {
-                        document.getElementById('wechat-create-avatar-input').click();
-                    });
-                }
+            // 新建角色页面的头像预览点击事件
+            const createAvatarPreview = document.getElementById('wechat-create-avatar-preview');
+            if (createAvatarPreview) {
+                createAvatarPreview.addEventListener('click', () => {
+                    document.getElementById('wechat-create-avatar-input').click();
+                });
+            }
                 
                 // 新建角色页面的选择图片按钮点击事件
                 const createAvatarUploadBtn = document.getElementById('wechat-create-avatar-upload-btn');
@@ -14188,7 +14817,6 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                         updateAvatarPreview(e.target.value.trim());
                     });
                 }
-            });
 
             async function saveWechatCharacter() {
                 let name, persona, speakingStyle, memory;
@@ -14686,7 +15314,7 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
             }
             
             // 页面加载完成后设置创建角色页面的按钮事件
-            document.addEventListener('DOMContentLoaded', setupCreateCharButtons);
+            setupCreateCharButtons();
             
             // 设置创建角色页面的头像上传事件
             function setupCreateCharAvatarEvents() {
@@ -15632,8 +16260,13 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
             // --- 微信钱包功能 --- 
             // 钱包状态
             const walletState = {
-                balance: 0
+                balance: parseFloat(localStorage.getItem('wechat_wallet_balance')) || 0
             };
+            
+            // 保存钱包状态
+            function saveWalletState() {
+                localStorage.setItem('wechat_wallet_balance', walletState.balance.toString());
+            }
             
             // 打开钱包界面
             function openWalletView() {
@@ -15714,6 +16347,7 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 }
                 
                 walletState.balance += amount;
+                saveWalletState();
                 updateWalletBalance();
                 closeRechargeModal();
                 alert(`充值成功！当前余额：¥${walletState.balance.toFixed(2)}`);
@@ -15735,6 +16369,7 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 }
                 
                 walletState.balance -= amount;
+                saveWalletState();
                 updateWalletBalance();
                 closeWithdrawModal();
                 alert(`提现成功！当前余额：¥${walletState.balance.toFixed(2)}`);
@@ -15829,10 +16464,14 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
             function openRedpacketModal() {
                 const modal = document.getElementById('wechat-redpacket-modal');
                 const redpacketBalance = document.getElementById('redpacket-balance');
+                const totalShow = document.getElementById('redpacket-total-show');
                 if (modal) {
                     modal.classList.add('active');
                     if (redpacketBalance) {
                         redpacketBalance.textContent = `¥${walletState.balance.toFixed(2)}`;
+                    }
+                    if (totalShow) {
+                        totalShow.textContent = '0.00';
                     }
                 }
             }
@@ -15843,8 +16482,23 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     modal.classList.remove('active');
                     document.getElementById('redpacket-amount').value = '';
                     document.getElementById('redpacket-msg').value = '恭喜发财，大吉大利';
+                    const totalShow = document.getElementById('redpacket-total-show');
+                    if (totalShow) totalShow.textContent = '0.00';
                 }
             }
+
+            // 监听红包金额输入，实时更新总额显示
+            document.getElementById('redpacket-amount')?.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value) || 0;
+                const totalShow = document.getElementById('redpacket-total-show');
+                const sendBtn = document.getElementById('redpacket-send-btn');
+                if (totalShow) totalShow.textContent = val.toFixed(2);
+                
+                // 实时校验按钮状态
+                if (sendBtn) {
+                    sendBtn.disabled = val <= 0 || val > walletState.balance;
+                }
+            });
             
             function sendRedpacket() {
                 const amountInput = document.getElementById('redpacket-amount');
@@ -15863,6 +16517,7 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 }
                 
                 walletState.balance -= amount;
+                saveWalletState();
                 updateWalletBalance();
                 closeRedpacketModal();
                 
@@ -15935,22 +16590,50 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
             // 更多功能面板
             function bindMorePanelEvents() {
                 const moreBtn = document.getElementById('wechat-more-btn');
-                const morePanel = document.getElementById('wechat-more-panel');
-                const moreItems = morePanel.querySelectorAll('.wechat-more-item');
+                const plusPanel = document.getElementById('wechat-plus-panel');
                 
-                if (moreBtn) {
-                    moreBtn.addEventListener('click', () => {
-                        morePanel.classList.toggle('active');
-                        document.getElementById('wechat-emoji-picker').classList.remove('active');
+                if (moreBtn && plusPanel) {
+                    moreBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isActive = plusPanel.classList.toggle('active');
+                        
+                        if (isActive) {
+                            const chatMessages = document.getElementById('wechat-messages');
+                            setTimeout(() => {
+                                chatMessages.scrollTop = chatMessages.scrollHeight;
+                            }, 260);
+                        }
                     });
                 }
                 
-                moreItems.forEach(item => {
-                    item.addEventListener('click', () => {
-                        const functionType = item.dataset.function;
-                        handleMoreFunction(functionType);
-                        morePanel.classList.remove('active');
-                    });
+                // 绑定加号面板项
+                document.getElementById('plus-panel-photo')?.addEventListener('click', () => {
+                    document.getElementById('wechat-image-btn')?.click();
+                    plusPanel.classList.remove('active');
+                });
+                
+                document.getElementById('plus-panel-camera')?.addEventListener('click', () => {
+                    alert('拍照功能开发中...');
+                    plusPanel.classList.remove('active');
+                });
+                
+                document.getElementById('plus-panel-redpacket')?.addEventListener('click', () => {
+                    openRedpacketModal();
+                    plusPanel.classList.remove('active');
+                });
+                
+                document.getElementById('plus-panel-transfer')?.addEventListener('click', () => {
+                    openWalletView();
+                    plusPanel.classList.remove('active');
+                });
+
+                // 点击消息列表或输入框时隐藏面板
+                document.getElementById('wechat-messages')?.addEventListener('click', () => {
+                    plusPanel.classList.remove('active');
+                });
+                
+                document.getElementById('wechat-input')?.addEventListener('focus', () => {
+                    plusPanel.classList.remove('active');
                 });
             }
             
@@ -17577,7 +18260,6 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
 
             notesList.innerHTML = notes.map(note => `
                 <div class="notes-item" data-id="${note.id}">
-                    <div class="notes-item-delete-btn" onclick="event.stopPropagation(); quickDeleteNote('${note.id}')">删除</div>
                     <div class="notes-item-main" onclick="openNoteEditor('${note.id}')">
                         <div class="notes-item-title">${note.content.split('\n')[0] || '无标题'}</div>
                         <div class="notes-item-info">
@@ -17588,198 +18270,109 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 </div>
             `).join('');
 
-            // 初始化滑动删除手势
-            initNotesSwipe();
+            // 初始化长按删除逻辑
+            initNotesLongPress();
         }
 
-        function initNotesSwipe() {
-            // 我们将事件监听器绑定到父容器上，利用事件委托来处理所有子元素的滑动
-            // 这样无论是现有的还是未来新添加的备忘录，都能响应滑动事件
-            const container = document.getElementById('notes-container');
+        function initNotesLongPress() {
+            const container = document.getElementById('notes-list');
             if (!container) return;
 
-            // 清除可能存在的旧事件监听，防止重复绑定
-            const newContainer = container.cloneNode(true);
-            container.parentNode.replaceChild(newContainer, container);
+            let longPressTimer = null;
+            let isMoving = false;
 
-            let startX = 0;
-            let currentX = 0;
-            let isSwiping = false;
-            let currentItem = null;
-            let currentMain = null;
+            container.querySelectorAll('.notes-item').forEach(item => {
+                const startPress = (e) => {
+                    isMoving = false;
+                    longPressTimer = setTimeout(() => {
+                        if (!isMoving) {
+                            const id = item.dataset.id;
+                            quickDeleteNote(id);
+                        }
+                    }, 800);
+                };
 
-            newContainer.addEventListener('touchstart', (e) => {
-                const item = e.target.closest('.notes-item');
-                if (!item) return;
+                const endPress = () => {
+                    clearTimeout(longPressTimer);
+                };
 
-                // 查找是否点在了删除按钮上
-                if (e.target.closest('.notes-item-delete-btn')) return;
+                const movePress = () => {
+                    isMoving = true;
+                    clearTimeout(longPressTimer);
+                };
 
-                currentItem = item;
-                currentMain = item.querySelector('.notes-item-main');
-                startX = e.touches[0].clientX;
-                isSwiping = true;
+                // 移除旧的监听器并重新绑定
+                item.onmousedown = startPress;
+                item.onmouseup = endPress;
+                item.onmouseleave = endPress;
+                item.onmousemove = movePress;
 
-                // 如果点击的是已经展开的项，不处理
-                if (item.classList.contains('swiped')) {
-                    isSwiping = false;
-                    return;
-                }
-
-                // 关闭其他已展开的项
-                document.querySelectorAll('.notes-item.swiped').forEach(el => {
-                    if (el !== item) {
-                        el.classList.remove('swiped');
-                        el.querySelector('.notes-item-main').style.transform = 'translateX(0)';
-                    }
-                });
-            }, { passive: true });
-
-            newContainer.addEventListener('touchmove', (e) => {
-                if (!isSwiping || !currentItem || !currentMain) return;
-                currentX = e.touches[0].clientX;
-                const diff = startX - currentX;
-                
-                if (diff > 5) {
-                    currentItem.classList.add('swiping');
-                    currentMain.style.transform = `translateX(-${Math.min(diff, 80)}px)`;
-                    // 阻止默认的滚动行为，防止滑动时页面上下滚动
-                    if(e.cancelable) e.preventDefault(); 
-                } else if (diff < -5 && currentItem.classList.contains('swiped')) {
-                    currentMain.style.transform = `translateX(-${Math.max(80 - Math.abs(diff), 0)}px)`;
-                    if(e.cancelable) e.preventDefault();
-                }
-            }, { passive: false });
-
-            newContainer.addEventListener('touchend', (e) => {
-                if (!isSwiping || !currentItem || !currentMain) return;
-                isSwiping = false;
-                currentItem.classList.remove('swiping');
-                const diff = startX - currentX;
-                
-                if (diff > 20) { // 只要露出红色就固定
-                    currentItem.classList.add('swiped');
-                    currentMain.style.transform = 'translateX(-80px)';
-                } else {
-                    currentItem.classList.remove('swiped');
-                    currentMain.style.transform = 'translateX(0)';
-                }
-                
-                currentItem = null;
-                currentMain = null;
-            });
-
-            // 鼠标模拟滑动（用于桌面端测试）
-            newContainer.addEventListener('mousedown', (e) => {
-                const item = e.target.closest('.notes-item');
-                if (!item) return;
-
-                if (e.target.closest('.notes-item-delete-btn')) return;
-
-                currentItem = item;
-                currentMain = item.querySelector('.notes-item-main');
-                startX = e.clientX;
-                isSwiping = true;
-
-                if (item.classList.contains('swiped')) {
-                    isSwiping = false;
-                    return;
-                }
-
-                document.querySelectorAll('.notes-item.swiped').forEach(el => {
-                    if (el !== item) {
-                        el.classList.remove('swiped');
-                        el.querySelector('.notes-item-main').style.transform = 'translateX(0)';
-                    }
-                });
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isSwiping || !currentItem || !currentMain) return;
-                const diff = startX - e.clientX;
-                if (diff > 5) {
-                    currentItem.classList.add('swiping');
-                    currentMain.style.transform = `translateX(-${Math.min(diff, 80)}px)`;
-                } else if (diff < -5 && currentItem.classList.contains('swiped')) {
-                    currentMain.style.transform = `translateX(-${Math.max(80 - Math.abs(diff), 0)}px)`;
-                }
-            });
-
-            document.addEventListener('mouseup', (e) => {
-                if (!isSwiping || !currentItem || !currentMain) return;
-                isSwiping = false;
-                currentItem.classList.remove('swiping');
-                const diff = startX - e.clientX;
-                
-                if (diff > 20) {
-                    currentItem.classList.add('swiped');
-                    currentMain.style.transform = 'translateX(-80px)';
-                } else {
-                    currentItem.classList.remove('swiped');
-                    currentMain.style.transform = 'translateX(0)';
-                }
-                
-                currentItem = null;
-                currentMain = null;
+                item.ontouchstart = startPress;
+                item.ontouchend = endPress;
+                item.ontouchmove = movePress;
             });
         }
 
         window.quickDeleteNote = function(id) {
-            if (confirm('确定要删除这条备忘录吗？')) {
+            const overlay = document.getElementById('notes-delete-confirm-overlay');
+            const content = overlay ? overlay.querySelector('.clock-modal-content') : null;
+            const confirmBtn = document.getElementById('notes-confirm-delete-btn');
+            
+            if (!overlay || !content || !confirmBtn) return;
+
+            overlay.style.display = 'flex';
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                content.style.transform = 'scale(1)';
+                content.style.opacity = '1';
+            }, 10);
+
+            // 绑定删除逻辑
+            confirmBtn.onclick = () => {
                 let notes = JSON.parse(localStorage.getItem('ios-notes') || '[]');
                 notes = notes.filter(n => n.id !== id);
                 localStorage.setItem('ios-notes', JSON.stringify(notes));
                 loadNotes();
+                closeNotesDeleteModal();
+                if (currentNoteId === id) {
+                    closeNoteEditor();
+                }
+            };
+        }
+
+        window.closeNotesDeleteModal = function() {
+            const overlay = document.getElementById('notes-delete-confirm-overlay');
+            const content = overlay ? overlay.querySelector('.clock-modal-content') : null;
+            if (overlay && content) {
+                overlay.style.opacity = '0';
+                content.style.transform = 'scale(1.1)';
+                content.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 300);
             }
         }
 
         window.openNoteEditor = function(id = null) {
             // 如果点击的是已经滑开删除按钮的笔记，只收回不打开
             const item = id ? document.querySelector(`.notes-item[data-id="${id}"]`) : null;
-            if (item && item.classList.contains('swiped')) {
-                item.classList.remove('swiped');
-                item.querySelector('.notes-item-main').style.transform = 'translateX(0)';
-                return;
-            }
-
-            // 如果有其他笔记被滑开了，点击任何地方（包括其他笔记或空白处）都只收回，不执行其他操作
-            const swipedItem = document.querySelector('.notes-item.swiped');
-            if (swipedItem) {
-                swipedItem.classList.remove('swiped');
-                swipedItem.querySelector('.notes-item-main').style.transform = 'translateX(0)';
-                return;
-            }
-
+            
             const editor = document.getElementById('notes-editor');
             const content = document.getElementById('note-content');
-            const deleteBtn = document.getElementById('notes-delete-btn');
             
             currentNoteId = id;
             if (id) {
                 const notes = JSON.parse(localStorage.getItem('ios-notes') || '[]');
                 const note = notes.find(n => n.id === id);
                 content.value = note ? note.content : '';
-                if (deleteBtn) deleteBtn.style.display = 'block';
             } else {
                 content.value = '';
-                if (deleteBtn) deleteBtn.style.display = 'none';
             }
 
             editor.style.display = 'flex';
             setTimeout(() => editor.classList.add('active'), 10);
             content.focus();
-        }
-
-        window.deleteNote = function() {
-            if (!currentNoteId) return;
-            
-            if (confirm('确定要删除这条备忘录吗？')) {
-                let notes = JSON.parse(localStorage.getItem('ios-notes') || '[]');
-                notes = notes.filter(n => n.id !== currentNoteId);
-                localStorage.setItem('ios-notes', JSON.stringify(notes));
-                loadNotes();
-                closeNoteEditor();
-            }
         }
 
         window.closeNoteEditor = function() {
