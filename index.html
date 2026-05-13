@@ -6566,35 +6566,35 @@
             right: 20px;
             width: 60px;
             height: 60px;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(30, 30, 30, 0.6); /* 强制使用深色背景，模仿 iOS 真实效果 */
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
             border-radius: 14px;
-            box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.15) inset, 0 8px 32px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.2) inset, 0 8px 32px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             z-index: 10000;
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.4s var(--spring-easing), opacity 0.4s ease, background-color 0.4s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             user-select: none;
-            opacity: 0.5;
+            opacity: 0.6;
         }
         
         .dark-mode .assistive-touch {
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.05) inset, 0 8px 32px rgba(0, 0, 0, 0.5);
+            background: rgba(45, 45, 45, 0.6);
+            box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1) inset, 0 8px 32px rgba(0, 0, 0, 0.5);
         }
         
         .assistive-touch:hover, .assistive-touch.active {
             opacity: 1;
             transform: scale(1.05);
             border-radius: 18px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
         }
 
         .dark-mode .assistive-touch:hover, .dark-mode .assistive-touch.active {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(30, 30, 30, 0.9);
         }
         
         .assistive-touch:active {
@@ -6605,12 +6605,12 @@
             position: relative;
             width: 42px;
             height: 42px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease;
             box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
 
@@ -6618,7 +6618,7 @@
             content: '';
             width: 30px;
             height: 30px;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
@@ -6628,9 +6628,9 @@
             position: absolute;
             width: 18px;
             height: 18px;
-            background: rgba(255, 255, 255, 0.85);
+            background: #fff; /* 纯白实心点 */
             border-radius: 50%;
-            box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
         }
         
         .assistive-touch.active .assistive-touch-dot {
@@ -6643,21 +6643,21 @@
             position: absolute;
             width: 260px;
             height: 260px;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(20, 20, 20, 0.9); /* 加深菜单背景 */
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
             border-radius: 42px;
             display: none;
             align-items: center;
             justify-content: center;
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
             opacity: 0;
             z-index: 9999;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-            border: 0.5px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            border: 0.5px solid rgba(255, 255, 255, 0.2);
         }
         
         .assistive-touch-menu.active {
@@ -6668,46 +6668,30 @@
         
         .assistive-touch-item {
             position: absolute;
-            width: 64px;
-            height: 64px;
+            width: 70px; /* 稍微调大一点 */
+            height: 70px;
             background: transparent;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            font-size: 24px;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            font-size: 26px; /* 调大图标 */
             color: #fff;
             border-radius: 16px;
         }
 
-        .assistive-touch-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            z-index: -1;
-            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
-        }
-        
-        .assistive-touch-item:hover {
-            transform: scale(1.1);
-        }
-
-        .assistive-touch-item:hover::before {
-            background: rgba(255, 255, 255, 0.2);
+        .assistive-touch-item i {
+            display: block !important; /* 确保图标一定显示 */
+            margin-bottom: 4px;
         }
 
         .assistive-touch-item span {
             font-size: 11px;
-            margin-top: 6px;
-            opacity: 0.8;
-            font-weight: 500;
+            color: #fff;
+            opacity: 0.9;
+            font-weight: 400;
         }
         
         /* 菜单图标位置 - 环形布局 */
@@ -18830,8 +18814,9 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     e.target.closest('.wechat-modal-body') ||
                     e.target.closest('.notes-container') ||
                     e.target.closest('.notes-editor-content') ||
-                    e.target.closest('#app-appstore')) {
-                    return; // 允许这些区域滚动
+                    e.target.closest('#app-appstore') ||
+                    e.target.closest('.assistive-touch')) {
+                    return; // 允许这些区域滚动或拖拽
                 }
                 e.preventDefault();
             }, { passive: false });
