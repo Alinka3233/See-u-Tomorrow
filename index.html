@@ -125,7 +125,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            background-color: #000; /* 恢复为黑色背景，防止在各种机型上出现白边 */
+            background-color: var(--bg-color); /* 使用系统背景色，确保在不同模式下背景颜色一致且无白边 */
             font-family: "SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
             transition: background-color 0.4s var(--spring-easing);
             min-width: 320px;
@@ -3312,16 +3312,17 @@
             height: 100%;
             background-color: #000;
             padding: 0;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .calculator-display-area {
-            flex: 0 0 auto;
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             justify-content: flex-end;
-            padding: 20px 20px 10px;
-            min-height: 150px;
+            padding: 20px 30px;
+            min-height: 0;
         }
 
         .calculator-history {
@@ -3336,7 +3337,6 @@
 
         .calculator-history-item {
             padding: 2px 0;
-            border-bottom: 1px solid #333;
         }
 
         .calculator-expression {
@@ -3348,18 +3348,23 @@
         }
 
         .calculator-display {
-            font-size: 64px;
-            font-weight: 300;
+            font-size: clamp(48px, 18vw, 84px);
+            font-weight: 200;
             color: #fff;
             text-align: right;
+            width: 100%;
+            line-height: 1.1;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .calculator-buttons {
-            flex: 1;
+            flex: 0 0 auto;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            gap: 14px;
             padding: 20px;
+            padding-bottom: 30px;
         }
 
         .calculator-btn {
@@ -3367,18 +3372,19 @@
             aspect-ratio: 1;
             border: none;
             border-radius: 50%;
-            font-size: 32px;
-            font-weight: 500;
+            font-size: clamp(24px, 7vw, 32px);
+            font-weight: 400;
             cursor: pointer;
-            transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, filter 0.15s ease;
+            transition: background-color 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .calculator-btn:active {
-            opacity: 0.8;
-            transform: scale(0.98);
+            filter: brightness(1.5);
         }
 
         /* 按钮颜色 */
@@ -3390,7 +3396,6 @@
         .calculator-btn-function {
             background-color: #a5a5a5;
             color: #000;
-            font-size: 28px;
         }
 
         .calculator-btn-operator {
@@ -3398,14 +3403,18 @@
             color: #fff;
         }
 
+        .calculator-btn-operator.active {
+            background-color: #fff;
+            color: #ff9500;
+        }
+
         /* 零按钮特殊样式 */
         .calculator-btn-zero {
             grid-column: span 2;
-            aspect-ratio: auto;
-            border-radius: 45px;
+            aspect-ratio: 2 / 1;
+            border-radius: 50px;
             justify-content: flex-start;
-            padding-left: 35px;
-            height: 100%;
+            padding-left: 25%;
         }
 
         .calculator-btn-spacer {
@@ -3554,6 +3563,8 @@
         .wechat-tab {
             display: none;
             height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .wechat-tab.active {
@@ -5095,7 +5106,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #ffffff; /* 修改为纯白背景，去除灰色感 */
+            background: #ededed; /* 修改为微信标准的聊天背景色 */
             z-index: 105; /* 确保覆盖在所有其他微信元素之上 */
         }
 
@@ -5110,7 +5121,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #ffffff; /* 使用纯白背景 */
+            background: #ededed; /* 修改为微信标准的头部背景色 */
             position: absolute;
             top: 0;
             left: 0;
@@ -5164,9 +5175,11 @@
             flex: 1;
             padding: 15px;
             padding-top: calc(54px + env(safe-area-inset-top, 20px) + 15px); /* 为绝对定位的 header 留出空间 */
+            padding-bottom: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            -webkit-overflow-scrolling: touch;
         }
 
         .wechat-message {
@@ -5210,23 +5223,49 @@
             background: #ffffff; /* 纯白，去透明度 */
             color: var(--text-color);
             border-bottom-left-radius: 4px;
+            position: relative;
+        }
+
+        .wechat-message.ai .wechat-message-bubble::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            bottom: 10px;
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 8px solid #ffffff;
         }
 
         .wechat-message.user .wechat-message-bubble {
-            background: #2c2c2e; /* 低调奢华的深空灰，无渐变 */
-            color: #ffffff;
+            background: #95ec69; /* 微信标准的绿色 */
+            color: #000;
             border-bottom-right-radius: 4px;
+            position: relative;
+        }
+
+        .wechat-message.user .wechat-message-bubble::before {
+            content: '';
+            position: absolute;
+            right: -8px;
+            bottom: 10px;
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 8px solid #95ec69;
         }
 
         .wechat-input-area {
-            padding: 12px 16px;
-            border-top: 1px solid rgba(0, 0, 0, 0.03); /* 极细边框 */
-            background: #ffffff; /* 修改为纯白背景 */
+            padding: 10px 20px; /* 增加左右间距，使输入框视觉上更短 */
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            background: #f7f7f7;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px; /* 减小间隙使整体更紧凑 */
             position: relative;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom)); /* 适配底部安全区 */
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
         }
 
         .wechat-input-btn {
@@ -5328,16 +5367,20 @@
 
         .wechat-input {
             flex: 1;
-            height: 40px;
-            padding: 0 16px;
-            border: none; /* 去除硬边框 */
-            border-radius: 20px;
-            font-size: 15px;
-            background: #ffffff; /* 纯白背景 */
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04); /* 极弱的立体感阴影 */
+            min-height: 36px; /* 稍微减小高度 */
+            max-height: 100px;
+            padding: 8px 12px;
+            margin: 0 4px; /* 添加外边距，缩短输入框宽度 */
+            border: none;
+            border-radius: 6px; /* 增加一点圆角感 */
+            font-size: 16px;
+            background: #ffffff;
             outline: none;
-            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
             color: #1d1d1f;
+            resize: none;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
         }
 
         .wechat-input:focus {
@@ -5347,12 +5390,16 @@
 
         /* 深色模式样式 */
         .app-page[data-theme="dark"] .wechat-chat-header {
-            background: rgba(28, 28, 30, 0.95);
+            background: #191919;
             border-bottom-color: rgba(255, 255, 255, 0.05);
         }
 
+        .app-page[data-theme="dark"] .wechat-chat-view {
+            background: #111111;
+        }
+
         .app-page[data-theme="dark"] .wechat-input-area {
-            background: #1c1c1e;
+            background: #191919;
             border-top-color: rgba(255, 255, 255, 0.05);
         }
 
@@ -5368,7 +5415,6 @@
         .app-page[data-theme="dark"] .wechat-input {
             background: #2c2c2e;
             color: #ffffff;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
             border: none;
         }
 
@@ -7969,6 +8015,182 @@
                 </div>
             </div>
             
+            <!-- 转账发送模态框 -->
+            <div class="wechat-modal wechat-transfer-view" id="wechat-transfer-modal">
+                <div class="wechat-transfer-container">
+                    <div class="transfer-header">
+                        <button class="transfer-close-btn" id="transfer-cancel-btn">取消</button>
+                        <h2 class="transfer-title">转账</h2>
+                    </div>
+                    
+                    <div class="transfer-target">
+                        <img id="transfer-target-avatar" src="" alt="">
+                        <div id="transfer-target-name"></div>
+                    </div>
+
+                    <div class="transfer-form">
+                        <div class="transfer-input-group">
+                            <div class="transfer-label">转账金额</div>
+                            <div class="transfer-input-item">
+                                <span class="transfer-currency">¥</span>
+                                <input type="number" id="transfer-amount" placeholder="0.00" min="0.01" step="0.01">
+                            </div>
+                        </div>
+                        <div class="transfer-tip">当前可用余额 <span id="transfer-balance">¥0.00</span></div>
+
+                        <div class="transfer-remark">
+                            <input type="text" id="transfer-remark" placeholder="添加转账说明">
+                        </div>
+
+                        <button class="transfer-submit-btn" id="transfer-send-btn">转账</button>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                /* 微信原生转账样式 */
+                .wechat-transfer-view {
+                    background: #f1f1f1 !important;
+                    z-index: 2000 !important;
+                }
+                .wechat-transfer-view .wechat-transfer-container {
+                    width: 100%;
+                    height: 100%;
+                    background: #f1f1f1;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .transfer-header {
+                    padding: 12px 16px;
+                    display: flex;
+                    align-items: center;
+                    background: #f1f1f1;
+                    position: relative;
+                }
+                .transfer-close-btn {
+                    background: none;
+                    border: none;
+                    font-size: 16px;
+                    color: #000;
+                    cursor: pointer;
+                    z-index: 1;
+                }
+                .transfer-title {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    text-align: center;
+                    font-size: 17px;
+                    font-weight: 600;
+                    margin: 0;
+                }
+                .transfer-target {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 30px 0;
+                }
+                .transfer-target img {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                }
+                #transfer-target-name {
+                    font-size: 16px;
+                    color: #000;
+                }
+                .transfer-form {
+                    padding: 0 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+                .transfer-input-group {
+                    background: #fff;
+                    border-radius: 8px;
+                    padding: 20px 15px;
+                }
+                .transfer-label {
+                    font-size: 14px;
+                    color: #000;
+                    margin-bottom: 15px;
+                }
+                .transfer-input-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+                .transfer-currency {
+                    font-size: 32px;
+                    font-weight: 500;
+                    color: #000;
+                }
+                .transfer-input-item input {
+                    flex: 1;
+                    border: none;
+                    font-size: 32px;
+                    font-weight: 500;
+                    outline: none;
+                    background: transparent;
+                }
+                .transfer-tip {
+                    font-size: 12px;
+                    color: #888;
+                    margin-top: 5px;
+                }
+                .transfer-remark {
+                    margin-top: 10px;
+                }
+                .transfer-remark input {
+                    width: 100%;
+                    background: none;
+                    border: none;
+                    border-bottom: 1px solid #ddd;
+                    padding: 5px 0;
+                    font-size: 14px;
+                    color: #576b95;
+                    outline: none;
+                }
+                .transfer-submit-btn {
+                    margin-top: 30px;
+                    background: #07c160;
+                    color: #fff;
+                    border: none;
+                    border-radius: 8px;
+                    padding: 12px;
+                    font-size: 17px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+                .transfer-submit-btn:active {
+                    background: #06ad56;
+                }
+                .transfer-submit-btn:disabled {
+                    background: #a3e9c4;
+                    cursor: not-allowed;
+                }
+                .dark-mode .wechat-transfer-view,
+                .dark-mode .wechat-transfer-container,
+                .dark-mode .transfer-header {
+                    background: #191919 !important;
+                }
+                .dark-mode .transfer-input-group {
+                    background: #232323;
+                }
+                .dark-mode .transfer-title,
+                .dark-mode .transfer-close-btn,
+                .dark-mode .transfer-label,
+                .dark-mode .transfer-currency,
+                .dark-mode #transfer-target-name {
+                    color: #fff;
+                }
+                .dark-mode .transfer-input-item input {
+                    color: #fff;
+                }
+            </style>
+            
             <!-- 红包发送模态框 -->
             <div class="wechat-modal wechat-redpacket-view" id="wechat-redpacket-modal">
                 <div class="wechat-redpacket-container">
@@ -9187,6 +9409,10 @@
                 if (jiggleMode) return;
                 activeApp = appName;
                 phoneContainer.classList.add('app-open');
+                
+                // 确保背景颜色重置为默认，避免手电筒等功能残留的背景色影响进入应用时的视觉体验
+                document.body.style.backgroundColor = ''; 
+                
                 appPages.forEach(page => page.classList.remove('active'));
                 let targetApp = implementedApps.includes(appName) ? document.getElementById(`app-${appName}`) : document.getElementById('app-placeholder');
                 if (targetApp) {
@@ -9208,6 +9434,14 @@
                 const phoneContainer = document.getElementById('phone-ui-container');
                 const appPages = document.querySelectorAll('.app-page');
                 phoneContainer.classList.remove('app-open');
+                
+                // 退出应用时，根据手电筒状态恢复背景颜色
+                if (controlStates.flashlight) {
+                    document.body.style.backgroundColor = 'rgba(255, 251, 204, 0.8)';
+                } else {
+                    document.body.style.backgroundColor = '';
+                }
+                
                 appPages.forEach(page => page.classList.remove('active'));
                 if (typeof stopCamera === 'function') {
                     stopCamera();
@@ -12393,10 +12627,32 @@
                 // 从localStorage加载位置
                 const savedPosition = localStorage.getItem('assistiveTouchPosition');
                 if (savedPosition) {
-                    const { x, y } = JSON.parse(savedPosition);
-                    assistiveTouch.style.left = `${x}px`;
-                    assistiveTouch.style.top = `${y}px`;
+                    try {
+                        const { x, y } = JSON.parse(savedPosition);
+                        if (!isNaN(x) && !isNaN(y)) {
+                            assistiveTouch.style.left = `${x}px`;
+                            assistiveTouch.style.top = `${y}px`;
+                        }
+                    } catch (e) {
+                        console.error('加载小白点位置失败:', e);
+                    }
                 }
+                
+                // 确保小白点在屏幕内且可见
+                const checkPosition = () => {
+                    const rect = assistiveTouch.getBoundingClientRect();
+                    if (rect.width === 0 || rect.height === 0 || 
+                        rect.left < -50 || rect.top < -50 || 
+                        rect.left > window.innerWidth || rect.top > window.innerHeight) {
+                        // 如果位置异常，重置到默认位置
+                        assistiveTouch.style.left = '';
+                        assistiveTouch.style.top = '';
+                        assistiveTouch.style.bottom = '200px';
+                        assistiveTouch.style.right = '20px';
+                        assistiveTouch.classList.remove('active');
+                    }
+                };
+                setTimeout(checkPosition, 500);
                 
                 // 拖动功能优化
                 let startLeft = 0;
@@ -12498,9 +12754,10 @@
 
                 // 辅助函数：移动到中心
                 function moveToCenter() {
+                    const rect = assistiveTouch.getBoundingClientRect();
                     originalPos = {
-                        x: parseInt(assistiveTouch.style.left),
-                        y: parseInt(assistiveTouch.style.top)
+                        x: rect.left,
+                        y: rect.top
                     };
                     
                     const centerX = window.innerWidth / 2 - assistiveTouch.offsetWidth / 2;
@@ -16503,6 +16760,76 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 }
             }
 
+            // 转账功能
+            function openTransferModal() {
+                const modal = document.getElementById('wechat-transfer-modal');
+                const char = wechatState.characters.find(c => c.id === wechatState.activeCharacterId);
+                if (modal && char) {
+                    modal.classList.add('active');
+                    document.getElementById('transfer-target-avatar').src = char.avatar;
+                    document.getElementById('transfer-target-name').textContent = char.name;
+                    document.getElementById('transfer-balance').textContent = `¥${walletState.balance.toFixed(2)}`;
+                }
+            }
+
+            function closeTransferModal() {
+                const modal = document.getElementById('wechat-transfer-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.getElementById('transfer-amount').value = '';
+                    document.getElementById('transfer-remark').value = '';
+                }
+            }
+
+            function sendTransfer() {
+                const amountInput = document.getElementById('transfer-amount');
+                const remarkInput = document.getElementById('transfer-remark');
+                const amount = parseFloat(amountInput.value);
+                const remark = remarkInput.value.trim();
+                
+                if (isNaN(amount) || amount <= 0) {
+                    alert('请输入有效的转账金额');
+                    return;
+                }
+                
+                if (amount > walletState.balance) {
+                    alert('余额不足');
+                    return;
+                }
+                
+                walletState.balance -= amount;
+                saveWalletState();
+                updateWalletBalance();
+                closeTransferModal();
+                
+                // 添加转账消息到聊天记录
+                const char = wechatState.characters.find(c => c.id === wechatState.activeCharacterId);
+                if (char) {
+                    const transferContent = `<div class="wechat-transfer">
+                        <div class="transfer-info">
+                            <div class="transfer-icon"><i class="fas fa-exchange-alt"></i></div>
+                            <div class="transfer-text">
+                                <div class="transfer-amount">¥${amount.toFixed(2)}</div>
+                                <div class="transfer-status">转账给${char.name}</div>
+                            </div>
+                        </div>
+                        ${remark ? `<div class="transfer-remark">${remark}</div>` : ''}
+                    </div>`;
+                    addWechatMessage(transferContent, 'user', char.avatar);
+                    char.chatHistory.push({ role: 'user', content: transferContent });
+                    saveWechatData();
+                }
+            }
+
+            // 监听转账金额输入
+            document.getElementById('transfer-amount')?.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value) || 0;
+                const sendBtn = document.getElementById('transfer-send-btn');
+                if (sendBtn) {
+                    sendBtn.disabled = val <= 0 || val > walletState.balance;
+                }
+            });
+
             // 监听红包金额输入，实时更新总额显示
             document.getElementById('redpacket-amount')?.addEventListener('input', (e) => {
                 const val = parseFloat(e.target.value) || 0;
@@ -16575,12 +16902,24 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 if (redpacketCloseBtn) {
                     redpacketCloseBtn.addEventListener('click', closeRedpacketModal);
                 }
+
+                // 转账发送按钮
+                const transferSendBtn = document.getElementById('transfer-send-btn');
+                if (transferSendBtn) {
+                    transferSendBtn.addEventListener('click', sendTransfer);
+                }
+                
+                // 转账取消按钮
+                const transferCancelBtn = document.getElementById('transfer-cancel-btn');
+                if (transferCancelBtn) {
+                    transferCancelBtn.addEventListener('click', closeTransferModal);
+                }
             }
             
             // 绑定钱包事件
             bindWalletEvents();
-            // 移除红包事件绑定，因为已删除红包按钮
-            // bindRedpacketEvents();
+            // 绑定红包事件
+            bindRedpacketEvents();
             
             // 表情选择器功能
             function bindEmojiEvents() {
@@ -16639,7 +16978,7 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 });
                 
                 document.getElementById('plus-panel-transfer')?.addEventListener('click', () => {
-                    openWalletView();
+                    openTransferModal();
                     plusPanel.classList.remove('active');
                 });
 
@@ -18458,6 +18797,8 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     e.target.closest('.apps-grid-container') || 
                     e.target.closest('.wechat-chat-list') || 
                     e.target.closest('.wechat-container') ||
+                    e.target.closest('.wechat-tab') ||
+                    e.target.closest('.wechat-modal-body') ||
                     e.target.closest('.notes-container') ||
                     e.target.closest('.notes-editor-content') ||
                     e.target.closest('#app-appstore')) {
