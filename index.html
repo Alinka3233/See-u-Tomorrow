@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <link rel="dns-prefetch" href="//fonts.loli.net">
+    <link rel="dns-prefetch" href="//cdn.staticfile.net">
+    <link rel="preconnect" href="https://fonts.loli.net">
+    <link rel="preconnect" href="https://cdn.staticfile.net">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=0">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -55,7 +59,7 @@
             --widget-bg-url: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop');
         }
 
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600;700;800&display=swap');
+        @import url('https://fonts.loli.net/css2?family=Inter:wght@200;400;500;600;700;800&display=swap');
 
         html, body {
             width: 100%;
@@ -5268,6 +5272,24 @@
             padding-bottom: calc(10px + env(safe-area-inset-bottom));
         }
 
+        /* 微信输入区域媒体适配 */
+        @media screen and (max-width: 380px) {
+            .wechat-input-area {
+                padding: 10px 8px; /* 进一步减少小屏幕边距 */
+                gap: 4px; /* 极小间隙 */
+            }
+            .wechat-input-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 18px;
+            }
+            .wechat-input {
+                margin: 0 2px;
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+        }
+
         .wechat-input-btn {
             width: 32px;
             height: 32px;
@@ -6815,6 +6837,13 @@
     </style>
 </head>
 <body>
+    <div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease;">
+        <div style="color: #fff; font-family: sans-serif; text-align: center;">
+            <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+            <div style="font-size: 14px; opacity: 0.8;">正在启动...</div>
+        </div>
+    </div>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
     <div id="phone-ui-container">
     <div class="wallpaper" id="wallpaper"></div>
     <div class="home-screen" id="home-screen">
@@ -8980,8 +9009,8 @@
     </div>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.staticfile.net/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.staticfile.net/Sortable/1.15.2/Sortable.min.js"></script>
     <script>
         // --- 全局稳定性增强：防止各种不可预见的异常导致应用崩溃 ---
         (function() {
@@ -18823,7 +18852,17 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
         }
 
         // 在 DOM 加载完成后初始化适配
-        document.addEventListener('DOMContentLoaded', initIOSAdaptation);
+        document.addEventListener('DOMContentLoaded', () => {
+            initIOSAdaptation();
+            // 隐藏加载动画
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => loadingScreen.style.display = 'none', 500);
+                }, 300);
+            }
+        });
     </script>
     </div>
 </body>
