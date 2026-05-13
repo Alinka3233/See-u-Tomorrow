@@ -5262,46 +5262,51 @@
         }
 
         .wechat-input-area {
-            padding: 10px 24px 10px 16px; /* 整体往左挪动 4px (左 20->16, 右 20->24) */
+            padding: 10px 12px; /* 使用对称且较小的内边距 */
             border-top: 1px solid rgba(0, 0, 0, 0.05);
             background: #f7f7f7;
             display: flex;
             align-items: center;
-            gap: 8px; /* 减小间隙使整体更紧凑 */
+            gap: 8px;
             position: relative;
             padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* 微信输入区域媒体适配 */
         @media screen and (max-width: 380px) {
             .wechat-input-area {
-                padding: 10px 12px 10px 4px; /* 同样整体往左挪动 4px (左 8->4, 右 8->12) */
-                gap: 4px; /* 极小间隙 */
+                padding: 10px 6px; /* 极小屏幕进一步缩小边距 */
+                gap: 6px;
             }
             .wechat-input-btn {
                 width: 28px;
                 height: 28px;
-                font-size: 18px;
+                font-size: 20px;
+                flex-shrink: 0; /* 强制按钮不缩放 */
             }
             .wechat-input {
-                margin: 0 2px;
+                margin: 0;
                 padding: 6px 10px;
-                font-size: 14px;
+                font-size: 15px;
+                min-width: 0; /* 允许输入框在 Flex 布局中自由收缩 */
             }
         }
 
         .wechat-input-btn {
             width: 32px;
             height: 32px;
+            flex-shrink: 0; /* 按钮不缩放 */
             border: none;
             background: none;
-            color: #8e8e93; /* 柔和图标色 */
-            font-size: 22px;
+            color: #8e8e93;
+            font-size: 24px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
+            transition: transform 0.2s, opacity 0.2s;
             position: relative;
         }
 
@@ -5389,12 +5394,13 @@
 
         .wechat-input {
             flex: 1;
-            min-height: 36px; /* 稍微减小高度 */
+            min-width: 0; /* 允许在 Flex 布局中收缩 */
+            min-height: 36px;
             max-height: 100px;
             padding: 8px 12px;
-            margin: 0 4px; /* 添加外边距，缩短输入框宽度 */
+            margin: 0 4px;
             border: none;
-            border-radius: 6px; /* 增加一点圆角感 */
+            border-radius: 6px;
             font-size: 16px;
             background: #ffffff;
             outline: none;
@@ -8655,15 +8661,12 @@
             </div>
             <div class="wechat-message-list" id="wechat-messages"></div>
             <div class="wechat-input-area">
-                <button id="wechat-emoji-btn" class="wechat-input-btn">
-                    <i class="fas fa-smile"></i>
-                </button>
                 <button id="wechat-voice-btn" class="wechat-input-btn">
                     <i class="fas fa-microphone"></i>
                 </button>
                 <input type="text" id="wechat-input" class="wechat-input" placeholder="">
-                <button id="wechat-image-btn" class="wechat-input-btn">
-                    <i class="fas fa-image"></i>
+                <button id="wechat-emoji-btn" class="wechat-input-btn">
+                    <i class="fas fa-smile"></i>
                 </button>
                 <button id="wechat-more-btn" class="wechat-input-btn">
                     <i class="fas fa-plus-circle"></i>
@@ -16976,7 +16979,7 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 
                 // 绑定加号面板项
                 document.getElementById('plus-panel-photo')?.addEventListener('click', () => {
-                    document.getElementById('wechat-image-btn')?.click();
+                    alert('图片发送功能开发中...');
                     plusPanel.classList.remove('active');
                 });
                 
@@ -17516,16 +17519,6 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 // 这里可以添加实际的语音录制结束逻辑
             }
             
-            // 图片发送功能
-            function bindImageEvents() {
-                const imageBtn = document.getElementById('wechat-image-btn');
-                if (imageBtn) {
-                    imageBtn.addEventListener('click', () => {
-                        alert('图片发送功能开发中');
-                    });
-                }
-            }
-            
             // 编辑个人资料功能
             function initWechatEditProfile() {
                 // 获取元素
@@ -17686,7 +17679,6 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
             bindEmojiEvents();
             bindMorePanelEvents();
             bindVoiceEvents();
-            bindImageEvents();
             bindChatAreaEvents();
             
             // 头像上传功能
