@@ -2,7 +2,11 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="iPhone Simulator">
+    <meta name="format-detection" content="telephone=no">
     <title>Please Remember Me Forever</title>
     <link rel="stylesheet" href="https://cdn.staticfile.net/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -56,9 +60,15 @@
         html, body {
             width: 100%;
             height: 100%;
+            height: 100dvh; /* 现代浏览器使用动态视口高度 */
+            height: calc(var(--vh, 1vh) * 100); /* iOS 兼容性回退 */
             margin: 0;
+            padding: 0;
             overflow: hidden;
             overflow-x: hidden;
+            position: fixed; /* 强制固定定位，防止 iOS 滚动露出背景 */
+            top: 0;
+            left: 0;
         }
         
         /* 隐藏默认滚动条 */
@@ -115,10 +125,14 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            background-color: var(--bg-color); /* 原来是 #000，改为背景色以防止在部分情况出现黑色背景 */
+            background-color: #000; /* 恢复为黑色背景，防止在各种机型上出现白边 */
             font-family: "SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
             transition: background-color 0.4s var(--spring-easing);
             min-width: 320px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none; /* 防止橡皮筋效果露底 */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
@@ -159,7 +173,7 @@
             min-height: 0; /* 防止子元素溢出 */
             overflow: hidden;
             background-color: transparent;
-            transition: all 0.5s var(--spring-easing);
+            transition: transform 0.5s var(--spring-easing), opacity 0.5s var(--spring-easing), background-color 0.5s var(--spring-easing), filter 0.5s var(--spring-easing);
         }
 
         .wallpaper {
@@ -177,9 +191,9 @@
         }
 
         .app-open .wallpaper {
-            transform: scale(1.15);
-            filter: blur(20px) brightness(0.6) saturate(1.2);
-            will-change: transform, filter;
+            transform: scale(1.1);
+            filter: blur(10px) brightness(0.7);
+            /* will-change handled by JS now to avoid memory leaks */
         }
 
         /* --- 主屏幕样式 --- */
@@ -218,6 +232,7 @@
             grid-auto-rows: min-content;
             gap: 24px 16px;
             width: 100%;
+            min-height: 100%; /* 确保网格占据容器全部高度，方便拖拽到空白区域 */
             padding: 10px 0;
         }
 
@@ -238,7 +253,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
             border: none;
             position: relative;
@@ -341,6 +356,7 @@
         }
 
         .app-icon {
+            touch-action: pan-y;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -350,7 +366,6 @@
             transition: transform 0.4s var(--spring-easing);
             width: 100%;
             position: relative; /* 为删除按钮提供定位基准 */
-            will-change: transform; /* 开启硬件加速，减少拖拽卡顿 */
         }
 
         .app-icon .icon {
@@ -363,7 +378,7 @@
             font-size: calc(28px * var(--icon-scale, 1));
             color: #fff;
             box-shadow: var(--shadow-sm);
-            transition: all 0.5s var(--spring-easing);
+            transition: transform 0.5s var(--spring-easing), opacity 0.5s var(--spring-easing), background-color 0.5s var(--spring-easing), filter 0.5s var(--spring-easing);
             border: none;
             overflow: hidden;
             position: relative;
@@ -416,20 +431,12 @@
         .icon.settings i { display: none; }
         .icon.phone { 
             background: #28CD41; 
-            background-image: url('icons/phone.png');
-            background-size: 100% 100%;
-            background-position: center;
-            background-repeat: no-repeat;
         }
-        .icon.phone i { display: none; }
+        .icon.phone i { display: block; }
         .icon.messages { 
             background: #28CD41; 
-            background-image: url('icons/messages.png');
-            background-size: 100% 100%;
-            background-position: center;
-            background-repeat: no-repeat;
         }
-        .icon.messages i { display: none; }
+        .icon.messages i { display: block; }
         .icon.music { background: #FF2D55; }
         .icon.photos { 
             background: #fff; 
@@ -710,7 +717,7 @@
             border: none;
             cursor: pointer;
             flex-shrink: 0;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
             min-width: 64px;
             text-align: center;
         }
@@ -1203,7 +1210,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
         }
 
         #weather-city-select-btn:active {
@@ -1488,6 +1495,7 @@
 
         .notes-list-header {
             padding: 20px;
+            padding-top: calc(20px + env(safe-area-inset-top)); /* 适配刘海屏 */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1607,6 +1615,7 @@
 
         .notes-toolbar {
             padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom)); /* 适配底部安全区域 */
             border-top: 1px solid rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
@@ -1661,6 +1670,7 @@
 
         .notes-editor-header {
             padding: 10px 20px;
+            padding-top: calc(10px + env(safe-area-inset-top)); /* 适配刘海屏 */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1695,6 +1705,7 @@
         .notes-editor-content {
             flex: 1;
             padding: 20px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom)); /* 适配底部安全区域 */
             font-size: 17px;
             border: none;
             resize: none;
@@ -1727,7 +1738,7 @@
             height: 6px;
             border-radius: var(--radius-full);
             background: rgba(255, 255, 255, 0.3);
-            transition: all 0.4s var(--spring-easing);
+            transition: transform 0.4s var(--spring-easing), opacity 0.4s var(--spring-easing), background-color 0.4s var(--spring-easing), filter 0.4s var(--spring-easing);
         }
 
         .pagination .dot.active {
@@ -1738,7 +1749,7 @@
 
         .dock-container {
             width: 100%;
-            padding: 0 16px 16px;
+            padding: 0 16px calc(16px + env(safe-area-inset-bottom));
             display: flex;
             justify-content: center;
             z-index: 3;
@@ -1746,8 +1757,9 @@
         }
 
         .dock {
-            width: 100%;
-            max-width: 320px; /* Reduced from 360px for tighter spacing */
+            width: fit-content; /* 让 Dock 根据内容自动调整宽度 */
+            min-width: 84px;
+            max-width: 95%; /* 限制最大宽度，防止溢出 */
             padding: 12px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px) saturate(210%);
@@ -1755,11 +1767,11 @@
             border-radius: 28px;
             display: flex;
             justify-content: center;
-            gap: 16px; /* Explicit gap for items < 4 */
+            gap: 16px; 
             box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--glass-border);
             border: none;
             transform: translateZ(0);
-            transition: max-width 0.4s var(--spring-easing), padding 0.4s var(--spring-easing);
+            transition: all 0.4s var(--spring-easing);
             margin: 0 auto;
         }
 
@@ -1773,19 +1785,12 @@
         }
 
         /* 动态调整 Dock 宽度，配合 Sortable.js 的 DOM 变化 */
-        .dock:has(> :nth-child(1):last-child) {
-            max-width: 84px; /* 60px + 12px*2 padding */
-        }
-        .dock:has(> :nth-child(2):last-child) {
-            max-width: 160px; /* 60px*2 + 16px gap + 12px*2 padding */
-        }
-        .dock:has(> :nth-child(3):last-child) {
-            max-width: 236px; /* 60px*3 + 16px*2 gap + 12px*2 padding */
-        }
-        .dock:has(> :nth-child(4):last-child) {
-            max-width: 320px; /* Tighter original width */
-            justify-content: space-between; /* 恢复原有的间距分布 */
-        }
+        .dock:has(> :nth-child(1):last-child) { width: 84px; }
+        .dock:has(> :nth-child(2):last-child) { width: 160px; }
+        .dock:has(> :nth-child(3):last-child) { width: 236px; }
+        .dock:has(> :nth-child(4):last-child) { width: 312px; }
+        .dock:has(> :nth-child(5):last-child) { width: 388px; }
+        .dock:has(> :nth-child(6):last-child) { width: 464px; }
 
         .dark-mode .dock {
             background: rgba(40, 40, 40, 0.4);
@@ -2175,7 +2180,7 @@
             cursor: pointer;
             margin-top: 30px;
             display: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
@@ -2213,7 +2218,7 @@
             align-items: flex-start; /* 靠上 */
             opacity: 0;
             pointer-events: none;
-            transition: all 0.4s var(--spring-easing);
+            transition: transform 0.4s var(--spring-easing), opacity 0.4s var(--spring-easing), background-color 0.4s var(--spring-easing), filter 0.4s var(--spring-easing);
         }
 
         .control-center.active {
@@ -2290,7 +2295,7 @@
             font-size: 14px;
             color: #fff;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             border: none;
             position: relative;
         }
@@ -2429,7 +2434,7 @@
             font-size: 16px;
             color: #fff;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             border: none;
         }
 
@@ -2565,7 +2570,7 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s var(--spring-easing);
+            transition: transform 0.3s var(--spring-easing), opacity 0.3s var(--spring-easing), background-color 0.3s var(--spring-easing), filter 0.3s var(--spring-easing);
         }
 
         .settings-button:active {
@@ -2614,7 +2619,7 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s var(--spring-easing);
+            transition: transform 0.3s var(--spring-easing), opacity 0.3s var(--spring-easing), background-color 0.3s var(--spring-easing), filter 0.3s var(--spring-easing);
             box-shadow: var(--shadow-md);
         }
 
@@ -2700,7 +2705,7 @@
         .mode-option {
             white-space: nowrap;
             opacity: 0.6;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -2731,7 +2736,7 @@
             padding: 4px;
             box-sizing: border-box;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2745,7 +2750,7 @@
             border-radius: 50%;
             border: 2px solid #000;
             background: white;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             pointer-events: none; /* 让事件穿透到父元素 shutter-button */
         }
 
@@ -2769,7 +2774,7 @@
             color: white;
             font-size: 22px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
             border: none;
             overflow: hidden;
         }
@@ -3061,7 +3066,7 @@
             padding: 8px 4px;
             position: relative;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
         }
 
         .theme-tab.active {
@@ -3109,7 +3114,7 @@
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), background-color 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), filter 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             border: 1px solid rgba(0,0,0,0.03);
             display: flex;
             flex-direction: column;
@@ -3182,7 +3187,7 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             text-align: center;
         }
 
@@ -3232,7 +3237,7 @@
             gap: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             border: 1px solid rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
         }
 
         .customizable-app-item:hover {
@@ -3280,7 +3285,7 @@
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
         }
 
         .icon-action-btn:hover {
@@ -3365,7 +3370,7 @@
             font-size: 32px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, filter 0.15s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -3423,7 +3428,7 @@
             font-weight: 600;
             color: var(--secondary-text-color);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
             border-bottom: 2px solid transparent;
         }
 
@@ -3520,7 +3525,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
         }
 
         .wechat-header-btn:hover {
@@ -3580,7 +3585,7 @@
             padding: 16px;
             border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             background-color: #fff;
         }
 
@@ -3604,7 +3609,7 @@
             margin-right: 16px;
             color: white;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
         }
 
         .wechat-contact-item:hover .wechat-contact-avatar {
@@ -3640,7 +3645,7 @@
             cursor: pointer;
             padding: 8px;
             border-radius: 8px;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             opacity: 1;
         }
 
@@ -3804,7 +3809,7 @@
             margin-right: 16px;
             color: white;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
@@ -3862,7 +3867,7 @@
             padding: 16px 20px;
             border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
         }
 
         .wechat-menu-item:last-child {
@@ -4116,7 +4121,7 @@
             cursor: pointer;
             padding: 8px 12px;
             border-radius: 8px;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
         }
         
         .wechat-edit-profile-cancel {
@@ -4170,7 +4175,7 @@
             position: relative;
             cursor: pointer;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
         }
         
         .wechat-edit-profile-avatar:hover {
@@ -4219,7 +4224,7 @@
             font-size: 16px;
             color: #1d1d1f;
             background-color: #fff;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             box-sizing: border-box;
         }
         
@@ -4379,7 +4384,7 @@
             object-fit: cover;
             border-radius: 6px;
             filter: contrast(0.95) brightness(1.02);
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.5s cubic-bezier(0.23, 1, 0.32, 1), filter 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
@@ -4405,7 +4410,7 @@
             gap: 8px;
             padding: 4px 8px;
             border-radius: 4px;
-            transition: all 0.3s;
+            transition: transform 0.3s, opacity 0.3s, background-color 0.3s, filter 0.3s;
             display: flex;
             align-items: center;
         }
@@ -4448,7 +4453,7 @@
             justify-content: center;
             cursor: pointer;
             z-index: 20;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
         }
 
         .moments-post-btn:hover {
@@ -4555,7 +4560,7 @@
             cursor: pointer;
             padding: 8px;
             border-radius: 8px;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
         }
 
         .moments-post-action-btn:hover {
@@ -4580,7 +4585,7 @@
             display: none;
             opacity: 0;
             transform: translateY(-10px);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
         }
 
         .wechat-plus-menu.show {
@@ -4732,7 +4737,7 @@
             padding: 8px 16px;
             border-radius: 20px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
         }
 
         .scan-mode-btn.active {
@@ -4832,7 +4837,7 @@
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
         }
 
         .balance-btn:hover {
@@ -4894,7 +4899,7 @@
             border-radius: 8px;
             background: white;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
             font-size: 14px;
         }
 
@@ -4965,7 +4970,7 @@
             border: none;
             padding: 8px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
             color: #8e8e93;
         }
 
@@ -5235,7 +5240,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
             position: relative;
         }
 
@@ -5331,7 +5336,7 @@
             background: #ffffff; /* 纯白背景 */
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04); /* 极弱的立体感阴影 */
             outline: none;
-            transition: all 0.2s;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;
             color: #1d1d1f;
         }
 
@@ -5549,7 +5554,7 @@
             cursor: pointer;
             padding: 0;
             line-height: 1;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             width: 32px;
             height: 32px;
             display: flex;
@@ -5602,7 +5607,7 @@
             font-family: inherit;
             color: #1d1d1f;
             background-color: #f9f9f9;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             box-sizing: border-box;
         }
 
@@ -5639,7 +5644,7 @@
             color: white;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
         }
 
         .wechat-avatar-preview img {
@@ -5658,7 +5663,7 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
         }
 
         #wechat-save-character:hover {
@@ -5704,7 +5709,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
             z-index: 2;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
@@ -5751,7 +5756,7 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -5805,7 +5810,7 @@
             color: #c7c7cc;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             margin-bottom: 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
             border: 2px solid #ffffff;
@@ -5863,7 +5868,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
         }
 
         .wechat-avatar-upload-btn:hover {
@@ -5907,7 +5912,7 @@
             font-size: 16px;
             background: #fff;
             color: #1d1d1f;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
             box-sizing: border-box;
         }
@@ -5959,7 +5964,7 @@
             font-size: 16px;
             background: var(--wechat-input-bg, #ffffff);
             color: #1d1d1f;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
             box-sizing: border-box;
         }
@@ -6005,7 +6010,7 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
@@ -6166,7 +6171,7 @@
             font-weight: 400;
             letter-spacing: 1px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(10px);
         }
 
@@ -6213,7 +6218,7 @@
             object-fit: cover;
             box-shadow: 0 40px 80px rgba(0,0,0,0.6), inset 0 0 0 8px rgba(0,0,0,0.2);
             border: 4px solid #1c1c1e;
-            transition: all 0.8s var(--spring-easing);
+            transition: transform 0.8s var(--spring-easing), opacity 0.8s var(--spring-easing), background-color 0.8s var(--spring-easing), filter 0.8s var(--spring-easing);
         }
 
         .album-art-container:hover .album-art {
@@ -6307,7 +6312,7 @@
             color: rgba(255, 255, 255, 0.6);
             font-size: 20px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.3s, opacity 0.3s, background-color 0.3s, filter 0.3s;
         }
 
         .control-btn:hover {
@@ -6326,7 +6331,7 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            transition: all 0.5s var(--spring-easing);
+            transition: transform 0.5s var(--spring-easing), opacity 0.5s var(--spring-easing), background-color 0.5s var(--spring-easing), filter 0.5s var(--spring-easing);
         }
 
         .play-pause-btn:hover {
@@ -6385,7 +6390,7 @@
             padding: 18px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.3s, opacity 0.3s, background-color 0.3s, filter 0.3s;
         }
 
         .song-item:hover {
@@ -6424,7 +6429,7 @@
             color: rgba(255, 255, 255, 0.2);
             font-size: 14px;
             padding: 10px;
-            transition: all 0.3s;
+            transition: transform 0.3s, opacity 0.3s, background-color 0.3s, filter 0.3s;
         }
 
         .song-item:hover .song-item-delete {
@@ -6487,6 +6492,7 @@
 
         /* --- iOS辅助触控（小白点）样式 --- */
         .assistive-touch {
+            touch-action: none;
             position: fixed;
             bottom: 200px;
             right: 20px;
@@ -6499,7 +6505,7 @@
             box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.15) inset, 0 8px 32px rgba(0, 0, 0, 0.25);
             cursor: pointer;
             z-index: 10000;
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -6536,7 +6542,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
             box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
 
@@ -6576,7 +6582,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             opacity: 0;
             z-index: 9999;
             top: 50%;
@@ -6602,7 +6608,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             font-size: 24px;
             color: #fff;
             border-radius: 16px;
@@ -6618,7 +6624,7 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             z-index: -1;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, filter 0.2s ease;
         }
         
         .assistive-touch-item:hover {
@@ -6728,6 +6734,36 @@
 
             .app-icon span {
                 font-size: calc(14px * var(--icon-scale, 1));
+            }
+        }
+        /* iOS Safari Performance Fallbacks */
+        @supports (-webkit-touch-callout: none) {
+            /* 降级 backdrop-filter，减少高频层的模糊 */
+            .widget, .dock, .appstore-header, .clock-tabs, .weather-header, .assistive-touch, .assistive-touch-menu, .assistive-touch-item, .app-header {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background-color: rgba(255, 255, 255, 0.85) !important;
+            }
+            .dark-mode .widget, .dark-mode .dock, .dark-mode .appstore-header, .dark-mode .clock-tabs, .dark-mode .weather-header, .dark-mode .assistive-touch, .dark-mode .assistive-touch-menu, .dark-mode .assistive-touch-item, .dark-mode .app-header {
+                background-color: rgba(30, 30, 30, 0.85) !important;
+            }
+            
+            /* 禁用高消耗阴影 */
+            * {
+                box-shadow: none !important;
+            }
+
+            /* 简化打开应用时的背景动画 */
+            .app-open .wallpaper {
+                filter: none !important;
+                transform: scale(1.05) !important;
+                opacity: 0.5;
+            }
+            
+            /* 禁用 home-screen 隐藏时的 blur */
+            .home-screen.hidden {
+                filter: none !important;
+                opacity: 0;
             }
         }
     </style>
@@ -7124,7 +7160,7 @@
                     <!-- 白天模式上传 -->
                     <div style="background: rgba(255, 255, 255, 0.9); border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                         <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 14px; text-align: center;">白天模式</h3>
-                        <div style="width: 100%; height: 120px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; overflow: hidden; position: relative;" onclick="document.getElementById('custom-wallpaper-light-upload').click()">
+                        <div style="width: 100%; height: 120px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease; overflow: hidden; position: relative;" onclick="document.getElementById('custom-wallpaper-light-upload').click()">
                             <input type="file" id="custom-wallpaper-light-upload" accept="image/*" style="display: none;" onchange="handleCustomWallpaperUpload(event, 'light')">
                             <div id="custom-wallpaper-light-preview" style="width: 100%; height: 100%; background: rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: center;">
                                 <div style="text-align: center;">
@@ -7138,7 +7174,7 @@
                     <!-- 暗黑模式上传 -->
                     <div style="background: rgba(255, 255, 255, 0.9); border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                         <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 14px; text-align: center;">暗黑模式</h3>
-                        <div style="width: 100%; height: 120px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; overflow: hidden; position: relative;" onclick="document.getElementById('custom-wallpaper-dark-upload').click()">
+                        <div style="width: 100%; height: 120px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease; overflow: hidden; position: relative;" onclick="document.getElementById('custom-wallpaper-dark-upload').click()">
                             <input type="file" id="custom-wallpaper-dark-upload" accept="image/*" style="display: none;" onchange="handleCustomWallpaperUpload(event, 'dark')">
                             <div id="custom-wallpaper-dark-preview" style="width: 100%; height: 100%; background: rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: center;">
                                 <div style="text-align: center;">
@@ -7165,7 +7201,7 @@
                 </div>
                 <div style="padding: 0 15px 20px 15px;">
                     <div style="background: rgba(255, 255, 255, 0.9); border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                        <div style="width: 100%; height: 100px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; overflow: hidden; position: relative;" onclick="document.getElementById('custom-widget-bg-upload').click()">
+                        <div style="width: 100%; height: 100px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease; overflow: hidden; position: relative;" onclick="document.getElementById('custom-widget-bg-upload').click()">
                             <input type="file" id="custom-widget-bg-upload" accept="image/*" style="display: none;" onchange="handleWidgetBgUpload(event)">
                             <div id="custom-widget-bg-preview" style="width: 100%; height: 100%; background: rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: center;">
                                 <div style="text-align: center;">
@@ -7248,8 +7284,8 @@
                         
                         <!-- 操作按钮 -->
                         <div style="display: flex; gap: 12px; margin-top: 8px;">
-                            <button id="json-reset-btn" class="settings-button" style="flex: 1; padding: 14px; border: 1px solid #5856D6; border-radius: 12px; font-size: 16px; font-weight: 500; color: #5856D6; background: transparent; cursor: pointer; transition: all 0.3s ease;">重置为默认</button>
-                            <button id="json-save-btn" class="settings-button" style="flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; color: white; background: #5856D6; cursor: pointer; transition: all 0.3s ease;">保存JSON限制</button>
+                            <button id="json-reset-btn" class="settings-button" style="flex: 1; padding: 14px; border: 1px solid #5856D6; border-radius: 12px; font-size: 16px; font-weight: 500; color: #5856D6; background: transparent; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;">重置为默认</button>
+                            <button id="json-save-btn" class="settings-button" style="flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; color: white; background: #5856D6; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;">保存JSON限制</button>
                         </div>
                     </div>
                 </div>
@@ -7302,7 +7338,7 @@
                         
                         <!-- 模型提取按钮 -->
                         <div style="display: flex; gap: 12px;">
-                            <button id="api-config-extract-model-btn" style="flex: 1; padding: 12px; border: none; border-radius: 12px; background: #007AFF; color: white; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.2s;">提取AI模型</button>
+                            <button id="api-config-extract-model-btn" style="flex: 1; padding: 12px; border: none; border-radius: 12px; background: #007AFF; color: white; font-size: 16px; font-weight: 500; cursor: pointer; transition: transform 0.2s, opacity 0.2s, background-color 0.2s, filter 0.2s;">提取AI模型</button>
                         </div>
                         <div id="model-detection-result" style="font-size: 12px; margin-top: 4px; min-height: 18px;"></div>
                         
@@ -7314,8 +7350,8 @@
                         
                         <!-- 操作按钮 -->
                         <div style="display: flex; gap: 12px; margin-top: 8px;">
-                            <button id="api-config-save-btn" class="settings-button" style="flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; color: white; background: #5856D6; cursor: pointer; transition: all 0.3s ease;">保存API配置</button>
-                            <button id="api-config-test-btn" class="settings-button" style="flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; color: white; background: #007AFF; cursor: pointer; transition: all 0.3s ease;">测试API连接</button>
+                            <button id="api-config-save-btn" class="settings-button" style="flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; color: white; background: #5856D6; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;">保存API配置</button>
+                            <button id="api-config-test-btn" class="settings-button" style="flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; color: white; background: #007AFF; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;">测试API连接</button>
                         </div>
                     </div>
                 </div>
@@ -7344,7 +7380,7 @@
                         
                         <!-- 操作按钮 -->
                         <div style="display: flex; gap: 12px; margin-top: 8px;">
-                            <button id="location-save-btn" class="settings-button" style="flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; color: white; background: #FF3B30; cursor: pointer; transition: all 0.3s ease;">保存 Key</button>
+                            <button id="location-save-btn" class="settings-button" style="flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; color: white; background: #FF3B30; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, filter 0.3s ease;">保存 Key</button>
                         </div>
                     </div>
                 </div>
@@ -7671,7 +7707,7 @@
 
     <!-- 备忘录删除二次确认弹窗 -->
     <div class="clock-modal-overlay" id="notes-delete-confirm-overlay" style="background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: opacity 0.3s ease;">
-        <div class="clock-modal-content" style="border-radius: 20px; width: 280px; margin: auto; padding: 0; overflow: hidden; background: rgba(255, 255, 255, 0.9); transform: scale(1.1); opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;">
+        <div class="clock-modal-content" style="border-radius: 20px; width: 280px; margin: auto; padding: 0; overflow: hidden; background: rgba(255, 255, 255, 0.9); transform: scale(1.1); opacity: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;">
             <div style="padding: 24px 20px 20px; text-align: center;">
                 <h3 style="margin: 0; color: #000; font-size: 17px; font-weight: 600; line-height: 1.3;">删除备忘录</h3>
                 <p style="color: #333; font-size: 13px; margin: 4px 0 0; line-height: 1.4;">确定要删除这条备忘录吗？</p>
@@ -8946,7 +8982,7 @@
                 icon.addEventListener('mouseup', cancelLongPress);
                 icon.addEventListener('touchend', cancelLongPress);
                 icon.addEventListener('mousemove', cancelLongPress);
-                icon.addEventListener('touchmove', cancelLongPress);
+                icon.addEventListener('touchmove', cancelLongPress, { passive: true });
             });
 
             function startLongPress(e) {
@@ -9031,21 +9067,28 @@
 
                 gridSortable = new Sortable(gridEl, {
                     group: 'apps',
-                    animation: 150,
+                    animation: 200, // 稍微增加动画时长，让位置交换更平滑
                     disabled: true,
                     easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
                     filter: '.widget',
                     preventOnFilter: false,
                     ghostClass: 'sortable-ghost',
                     dragClass: 'sortable-drag',
-                    forceFallback: true,
+                    forceFallback: true, // 保持开启以确保移动端一致性
                     fallbackClass: 'sortable-fallback',
                     fallbackOnBody: true,
-                    fallbackTolerance: 0, 
-                    swapThreshold: 0.5,
-                    invertedSwapThreshold: 0.5,
+                    fallbackTolerance: 5, // 增加容差，防止误触发拖拽
+                    swapThreshold: 0.65, // 提高交换阈值，让拖动更稳定
+                    invertedSwapThreshold: 0.65,
                     scroll: true,
-                    scrollSensitivity: 50,
+                    scrollSensitivity: 80, // 提高滚动灵敏度
+                    bubbleScroll: true,
+                    onAdd: function (evt) {
+                        // 当图标从 Dock 拖入网格时，默认排到最后面
+                        const gridEl = document.querySelector('.apps-grid');
+                        gridEl.appendChild(evt.item);
+                        saveAppLayout();
+                    },
                     onEnd: saveAppLayout, // 拖拽结束保存布局
                     onMove: function (evt) {
                         if (evt.dragged.classList.contains('widget') && evt.to === dockEl) {
@@ -9059,7 +9102,7 @@
                         name: 'apps',
                         put: true
                     },
-                    animation: 150,
+                    animation: 200,
                     disabled: true,
                     direction: 'horizontal',
                     easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
@@ -9068,13 +9111,15 @@
                     forceFallback: true,
                     fallbackClass: 'sortable-fallback',
                     fallbackOnBody: true,
-                    fallbackTolerance: 0,
-                    swapThreshold: 0.5,
-                    invertedSwapThreshold: 0.5,
+                    fallbackTolerance: 5,
+                    swapThreshold: 0.65,
+                    invertedSwapThreshold: 0.65,
                     onEnd: saveAppLayout, // 拖拽结束保存布局
                     onAdd: function (evt) {
-                        if (dockEl.children.length > 4) {
+                        // iOS 现代机型 Dock 栏通常支持最多 4-6 个图标，这里放宽到 6 个
+                        if (dockEl.children.length > 6) {
                             const icons = Array.from(dockEl.children);
+                            // 找到被挤出来的那个（通常是最后一个，或者是被替换的那个）
                             let displacedIcon;
                             if (evt.item === icons[icons.length - 1]) {
                                 displacedIcon = icons[icons.length - 2];
@@ -9089,11 +9134,6 @@
                         saveAppLayout(); // 添加元素后保存
                     },
                     onRemove: saveAppLayout, // 移除元素后保存
-                    onMove: function (evt) {
-                        if (evt.from === dockEl && evt.to !== dockEl && dockEl.children.length <= 1) {
-                            return false;
-                        }
-                    }
                 });
             }
 
@@ -11971,6 +12011,8 @@
 
             // 图标自定义功能
             const customizableApps = [
+                { app: 'phone', name: '电话', icon: 'fas fa-phone' },
+                { app: 'messages', name: '信息', icon: 'fas fa-comment' },
                 { app: 'safari', name: 'Safari', icon: 'fas fa-globe' },
                 { app: 'weather', name: '天气', icon: 'fas fa-cloud-sun' },
                 { app: 'settings', name: '设置', icon: 'fas fa-cog' },
@@ -12356,129 +12398,103 @@
                     assistiveTouch.style.top = `${y}px`;
                 }
                 
-                // 拖动功能
+                // 拖动功能优化
+                let startLeft = 0;
+                let startTop = 0;
+                let currentTranslateX = 0;
+                let currentTranslateY = 0;
+
+                const startDrag = (clientX, clientY) => {
+                    if (menuVisible) return;
+                    isDragging = true;
+                    hasMoved = false;
+                    startX = clientX;
+                    startY = clientY;
+                    startLeft = assistiveTouch.offsetLeft;
+                    startTop = assistiveTouch.offsetTop;
+                    currentTranslateX = 0;
+                    currentTranslateY = 0;
+                    assistiveTouch.style.transition = 'none';
+                };
+
+                const doDrag = (clientX, clientY) => {
+                    if (!isDragging || menuVisible) return;
+                    const dx = clientX - startX;
+                    const dy = clientY - startY;
+                    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                        hasMoved = true;
+                    }
+
+                    // 限制在屏幕范围内
+                    const maxX = window.innerWidth - assistiveTouch.offsetWidth - startLeft;
+                    const maxY = window.innerHeight - assistiveTouch.offsetHeight - startTop;
+                    const minX = -startLeft;
+                    const minY = -startTop;
+                    
+                    currentTranslateX = Math.max(minX, Math.min(dx, maxX));
+                    currentTranslateY = Math.max(minY, Math.min(dy, maxY));
+                    
+                    // 使用 transform: translate3d 来替代 left/top 修改
+                    assistiveTouch.style.transform = `translate3d(${currentTranslateX}px, ${currentTranslateY}px, 0)`;
+                };
+
+                const endDrag = () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    
+                    // 将 transform 的偏移量应用到 left/top
+                    let x = startLeft + currentTranslateX;
+                    let y = startTop + currentTranslateY;
+                    
+                    // 吸附到边缘
+                    const windowWidth = window.innerWidth;
+                    const halfWidth = windowWidth / 2;
+                    const margin = 8;
+                    
+                    let targetX;
+                    if (x < halfWidth) {
+                        targetX = margin;
+                    } else {
+                        targetX = windowWidth - assistiveTouch.offsetWidth - margin;
+                    }
+
+                    // 移除 transform 并设置最终的 left/top
+                    assistiveTouch.style.transform = '';
+                    assistiveTouch.style.left = `${targetX}px`;
+                    assistiveTouch.style.top = `${y}px`;
+                    
+                    assistiveTouch.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                    
+                    // 保存位置
+                    localStorage.setItem('assistiveTouchPosition', JSON.stringify({
+                        x: targetX,
+                        y: y
+                    }));
+                };
+
                 assistiveTouch.addEventListener('mousedown', (e) => {
-                    if (e.target.classList.contains('assistive-touch-item') || menuVisible) return;
-                    isDragging = true;
-                    hasMoved = false;
-                    startX = e.clientX;
-                    startY = e.clientY;
-                    offsetX = e.clientX - assistiveTouch.offsetLeft;
-                    offsetY = e.clientY - assistiveTouch.offsetTop;
-                    assistiveTouch.style.transition = 'none';
+                    if (e.target.classList.contains('assistive-touch-item')) return;
+                    startDrag(e.clientX, e.clientY);
                 });
-                
                 document.addEventListener('mousemove', (e) => {
-                    if (isDragging && !menuVisible) {
-                        const dx = e.clientX - startX;
-                        const dy = e.clientY - startY;
-                        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-                            hasMoved = true;
-                        }
+                    doDrag(e.clientX, e.clientY);
+                });
+                document.addEventListener('mouseup', endDrag);
 
-                        let x = e.clientX - offsetX;
-                        let y = e.clientY - offsetY;
-                        
-                        // 限制在屏幕范围内
-                        const maxX = window.innerWidth - assistiveTouch.offsetWidth;
-                        const maxY = window.innerHeight - assistiveTouch.offsetHeight;
-                        x = Math.max(0, Math.min(x, maxX));
-                        y = Math.max(0, Math.min(y, maxY));
-                        
-                        assistiveTouch.style.left = `${x}px`;
-                        assistiveTouch.style.top = `${y}px`;
-                    }
-                });
-                
-                document.addEventListener('mouseup', () => {
-                    if (isDragging) {
-                        isDragging = false;
-                        assistiveTouch.style.transition = 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
-                        
-                        // 吸附到边缘
-                        const x = parseInt(assistiveTouch.style.left);
-                        const windowWidth = window.innerWidth;
-                        const halfWidth = windowWidth / 2;
-                        const margin = 8;
-                        
-                        let targetX;
-                        if (x < halfWidth) {
-                            targetX = margin;
-                        } else {
-                            targetX = windowWidth - assistiveTouch.offsetWidth - margin;
-                        }
-                        assistiveTouch.style.left = `${targetX}px`;
-                        
-                        // 保存位置
-                        localStorage.setItem('assistiveTouchPosition', JSON.stringify({
-                            x: targetX,
-                            y: parseInt(assistiveTouch.style.top)
-                        }));
-                    }
-                });
-                
-                // 触摸事件支持
                 assistiveTouch.addEventListener('touchstart', (e) => {
-                    if (e.target.classList.contains('assistive-touch-item') || menuVisible) return;
-                    isDragging = true;
-                    hasMoved = false;
+                    if (e.target.classList.contains('assistive-touch-item')) return;
                     const touch = e.touches[0];
-                    startX = touch.clientX;
-                    startY = touch.clientY;
-                    offsetX = touch.clientX - assistiveTouch.offsetLeft;
-                    offsetY = touch.clientY - assistiveTouch.offsetTop;
-                    assistiveTouch.style.transition = 'none';
-                });
-                
+                    startDrag(touch.clientX, touch.clientY);
+                }, { passive: true });
                 document.addEventListener('touchmove', (e) => {
-                    if (isDragging && !menuVisible) {
+                    if(isDragging) {
                         const touch = e.touches[0];
-                        const dx = touch.clientX - startX;
-                        const dy = touch.clientY - startY;
-                        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-                            hasMoved = true;
-                        }
-
-                        let x = touch.clientX - offsetX;
-                        let y = touch.clientY - offsetY;
-                        
-                        // 限制在屏幕范围内
-                        const maxX = window.innerWidth - assistiveTouch.offsetWidth;
-                        const maxY = window.innerHeight - assistiveTouch.offsetHeight;
-                        x = Math.max(0, Math.min(x, maxX));
-                        y = Math.max(0, Math.min(y, maxY));
-                        
-                        assistiveTouch.style.left = `${x}px`;
-                        assistiveTouch.style.top = `${y}px`;
+                        doDrag(touch.clientX, touch.clientY);
                     }
-                });
+                }, { passive: true });
+                document.addEventListener('touchend', endDrag);
                 
-                document.addEventListener('touchend', () => {
-                    if (isDragging) {
-                        isDragging = false;
-                        assistiveTouch.style.transition = 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
-                        
-                        // 吸附到边缘
-                        const x = parseInt(assistiveTouch.style.left);
-                        const windowWidth = window.innerWidth;
-                        const halfWidth = windowWidth / 2;
-                        const margin = 8;
-                        
-                        let targetX;
-                        if (x < halfWidth) {
-                            targetX = margin;
-                        } else {
-                            targetX = windowWidth - assistiveTouch.offsetWidth - margin;
-                        }
-                        assistiveTouch.style.left = `${targetX}px`;
-                        
-                        // 保存位置
-                        localStorage.setItem('assistiveTouchPosition', JSON.stringify({
-                            x: targetX,
-                            y: parseInt(assistiveTouch.style.top)
-                        }));
-                    }
-                });
+
 
                 // 辅助函数：移动到中心
                 function moveToCenter() {
@@ -13293,7 +13309,7 @@
                                 actions.style.transform = `translateX(-${Math.min(diffX, 80)}px)`;
                             }
                         }
-                    });
+                    }, { passive: false });
 
                     item.addEventListener('touchend', (e) => {
                         const currentX = e.changedTouches[0].clientX;
@@ -18377,6 +18393,8 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
 
         window.closeNoteEditor = function() {
             const editor = document.getElementById('notes-editor');
+            const content = document.getElementById('note-content');
+            content.blur(); // 强制收起键盘，防止白边
             editor.classList.remove('active');
             setTimeout(() => editor.style.display = 'none', 300);
         }
@@ -18431,6 +18449,40 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
             // 由于手势条和手势区域已隐藏，此功能已简化
             // 保留函数结构以避免其他代码依赖错误
         }
+
+        // --- iOS 全系列全屏与视口适配逻辑 ---
+        function initIOSAdaptation() {
+            // 1. 防止橡皮筋效果露底，但允许特定区域滚动
+            document.addEventListener('touchmove', function(e) {
+                if (e.target.closest('.app-content') || 
+                    e.target.closest('.apps-grid-container') || 
+                    e.target.closest('.wechat-chat-list') || 
+                    e.target.closest('.wechat-container') ||
+                    e.target.closest('.notes-container') ||
+                    e.target.closest('.notes-editor-content') ||
+                    e.target.closest('#app-appstore')) {
+                    return; // 允许这些区域滚动
+                }
+                e.preventDefault();
+            }, { passive: false });
+
+            // 2. 动态处理 iOS 视口高度，解决 100vh 包含地址栏的问题
+            const setVH = () => {
+                let vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            };
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', setVH);
+            setVH();
+
+            // 3. 处理 iOS Web App 模式下的点击延迟与状态
+            if (window.navigator.standalone) {
+                document.body.classList.add('ios-standalone');
+            }
+        }
+
+        // 在 DOM 加载完成后初始化适配
+        document.addEventListener('DOMContentLoaded', initIOSAdaptation);
     </script>
     </div>
 </body>
