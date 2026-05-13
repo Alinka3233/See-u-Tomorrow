@@ -5262,7 +5262,7 @@
         }
 
         .wechat-input-area {
-            padding: 10px 20px; /* 增加左右间距，使输入框视觉上更短 */
+            padding: 10px 24px 10px 16px; /* 整体往左挪动 4px (左 20->16, 右 20->24) */
             border-top: 1px solid rgba(0, 0, 0, 0.05);
             background: #f7f7f7;
             display: flex;
@@ -5275,7 +5275,7 @@
         /* 微信输入区域媒体适配 */
         @media screen and (max-width: 380px) {
             .wechat-input-area {
-                padding: 10px 8px; /* 进一步减少小屏幕边距 */
+                padding: 10px 12px 10px 4px; /* 同样整体往左挪动 4px (左 8->4, 右 8->12) */
                 gap: 4px; /* 极小间隙 */
             }
             .wechat-input-btn {
