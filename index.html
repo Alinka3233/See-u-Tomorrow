@@ -4935,31 +4935,74 @@
             color: #666;
         }
 
-        /* 聊天红包样式 */
+        /* 聊天红包样式 - 1:1 还原微信官方 */
         .wechat-redpacket {
-            background: linear-gradient(135deg, #FF5252, #FF1744);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin: 12px 0;
-            display: inline-block;
+            background-color: #fa9d3b;
+            width: 230px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: transform 0.2s;
+            overflow: hidden;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        .wechat-redpacket:hover {
-            transform: scale(1.02);
+        .wechat-redpacket-top {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .redpacket-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
+        .wechat-redpacket-icon {
+            width: 34px;
+            height: 40px;
+            background: #f25542;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
-        .redpacket-amount {
+        .wechat-redpacket-icon::after {
+            content: "🧧";
             font-size: 20px;
-            font-weight: 700;
+        }
+
+        .wechat-redpacket-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .wechat-redpacket-msg {
+            color: #fff;
+            font-size: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 2px;
+        }
+
+        .wechat-redpacket-status {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+        }
+
+        .wechat-redpacket-bottom {
+            background: #fff;
+            padding: 4px 16px;
+            font-size: 11px;
+            color: #888;
+        }
+
+        .wechat-message.user .wechat-redpacket {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .wechat-message.ai .wechat-redpacket {
+            margin-left: 0;
+            margin-right: 0;
         }
 
         /* 微信底部导航栏样式 */
@@ -5259,6 +5302,11 @@
             border-top: 6px solid transparent;
             border-bottom: 6px solid transparent;
             border-left: 8px solid #95ec69;
+        }
+
+        .wechat-message.ai .wechat-message-bubble.no-bg::before,
+        .wechat-message.user .wechat-message-bubble.no-bg::before {
+            display: none;
         }
 
         .wechat-input-area {
@@ -6584,7 +6632,7 @@
             align-items: center;
             justify-content: center;
             user-select: none;
-            opacity: 0.6;
+            opacity: 0.4; /* 闲置时更透明，模仿真实iOS */
         }
         
         .dark-mode .assistive-touch {
@@ -6592,14 +6640,27 @@
             box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1) inset, 0 8px 32px rgba(0, 0, 0, 0.5);
         }
         
-        .assistive-touch:hover, .assistive-touch.active {
+        @media (hover: hover) {
+            .assistive-touch:hover {
+                opacity: 1;
+                transform: scale(1.05);
+                border-radius: 18px;
+                background: rgba(0, 0, 0, 0.8);
+            }
+
+            .dark-mode .assistive-touch:hover {
+                background: rgba(30, 30, 30, 0.9);
+            }
+        }
+        
+        .assistive-touch.active, .assistive-touch.dragging {
             opacity: 1;
             transform: scale(1.05);
             border-radius: 18px;
             background: rgba(0, 0, 0, 0.8);
         }
 
-        .dark-mode .assistive-touch:hover, .dark-mode .assistive-touch.active {
+        .dark-mode .assistive-touch.active, .dark-mode .assistive-touch.dragging {
             background: rgba(30, 30, 30, 0.9);
         }
         
@@ -8034,6 +8095,231 @@
                 </div>
             </div>
             
+            <!-- 领取红包模态框 -->
+            <div class="wechat-modal wechat-redpacket-open-view" id="wechat-redpacket-open-modal">
+                <div class="redpacket-open-container">
+                    <div class="redpacket-open-close" id="redpacket-open-close">&times;</div>
+                    <div class="redpacket-open-content">
+                        <div class="redpacket-open-sender">
+                            <img id="redpacket-open-avatar" src="" alt="">
+                            <div id="redpacket-open-name"></div>
+                        </div>
+                        <div class="redpacket-open-msg" id="redpacket-open-msg">给你发了一个红包</div>
+                        <div class="redpacket-open-title">恭喜发财，大吉大利</div>
+                        
+                        <div class="redpacket-open-btn-container">
+                            <div class="redpacket-open-btn" id="redpacket-open-btn">開</div>
+                        </div>
+                    </div>
+
+                    <!-- 领取后的详情展示 -->
+                    <div class="redpacket-detail-content" id="redpacket-detail-content" style="display: none;">
+                        <div class="redpacket-detail-header">
+                            <div class="redpacket-detail-sender">
+                                <img id="redpacket-detail-avatar" src="" alt="">
+                                <span id="redpacket-detail-name"></span>的红包
+                            </div>
+                        </div>
+                        <div class="redpacket-detail-body">
+                            <div class="redpacket-detail-msg" id="redpacket-detail-msg">恭喜发财，大吉大利</div>
+                            <div class="redpacket-detail-amount">
+                                <span class="amount-num" id="redpacket-detail-amount">0.00</span><span class="amount-unit">元</span>
+                            </div>
+                            <div class="redpacket-detail-status">已存入零钱，可用于支付</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                /* 领取红包模态框样式 */
+                .wechat-redpacket-open-view {
+                    background: rgba(0,0,0,0.6) !important;
+                    z-index: 3000 !important;
+                }
+                .redpacket-open-container {
+                    width: 300px;
+                    height: 420px;
+                    background: #cf4e42;
+                    border-radius: 12px;
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    animation: rpPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                @keyframes rpPop {
+                    from { transform: scale(0.5); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+                .redpacket-open-close {
+                    position: absolute;
+                    top: 10px;
+                    left: 15px;
+                    color: rgba(255,255,255,0.5);
+                    font-size: 28px;
+                    cursor: pointer;
+                    z-index: 10;
+                }
+                .redpacket-open-content {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding-top: 50px;
+                    background: linear-gradient(to bottom, #cf4e42 0%, #cf4e42 70%, #c1463a 100%);
+                    position: relative;
+                }
+                /* 红包顶部的弧形 */
+                .redpacket-open-content::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -100px;
+                    left: -50%;
+                    width: 200%;
+                    height: 200px;
+                    background: #cf4e42;
+                    border-radius: 50%;
+                    z-index: 1;
+                    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                }
+                .redpacket-open-sender {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    z-index: 2;
+                }
+                .redpacket-open-sender img {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 6px;
+                    margin-bottom: 10px;
+                    border: 1px solid rgba(255,255,255,0.1);
+                }
+                #redpacket-open-name {
+                    color: #f8e7a8;
+                    font-size: 16px;
+                    font-weight: 500;
+                }
+                .redpacket-open-msg {
+                    color: #f8e7a8;
+                    font-size: 14px;
+                    margin-top: 8px;
+                    opacity: 0.8;
+                    z-index: 2;
+                }
+                .redpacket-open-title {
+                    color: #f8e7a8;
+                    font-size: 20px;
+                    font-weight: 600;
+                    margin-top: 25px;
+                    z-index: 2;
+                }
+                .redpacket-open-btn-container {
+                    margin-top: 40px;
+                    z-index: 3;
+                }
+                .redpacket-open-btn {
+                    width: 90px;
+                    height: 90px;
+                    background: #f8e7a8;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 36px;
+                    color: #333;
+                    font-weight: bold;
+                    cursor: pointer;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                    transition: transform 0.2s;
+                }
+                .redpacket-open-btn:active {
+                    transform: scale(0.95);
+                }
+                .redpacket-open-btn.spinning {
+                    animation: rpSpin 1s infinite linear;
+                }
+                @keyframes rpSpin {
+                    from { transform: rotateY(0deg); }
+                    to { transform: rotateY(360deg); }
+                }
+
+                /* 详情展示样式 */
+                .redpacket-detail-content {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: #f1f1f1;
+                    z-index: 5;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .redpacket-detail-header {
+                    background: #cf4e42;
+                    padding: 40px 20px 20px;
+                    color: #f8e7a8;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    position: relative;
+                }
+                .redpacket-detail-header::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -30px;
+                    left: -10%;
+                    width: 120%;
+                    height: 60px;
+                    background: #cf4e42;
+                    border-radius: 50%;
+                }
+                .redpacket-detail-sender {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    z-index: 2;
+                    font-size: 14px;
+                }
+                .redpacket-detail-sender img {
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 3px;
+                }
+                .redpacket-detail-body {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding-top: 60px;
+                    z-index: 1;
+                }
+                .redpacket-detail-msg {
+                    font-size: 14px;
+                    color: #888;
+                    margin-bottom: 20px;
+                }
+                .redpacket-detail-amount {
+                    color: #cf4e42;
+                    margin-bottom: 10px;
+                }
+                .amount-num {
+                    font-size: 48px;
+                    font-weight: bold;
+                }
+                .amount-unit {
+                    font-size: 14px;
+                    margin-left: 4px;
+                }
+                .redpacket-detail-status {
+                    font-size: 13px;
+                    color: #576b95;
+                    cursor: pointer;
+                }
+            </style>
+
             <!-- 转账发送模态框 -->
             <div class="wechat-modal wechat-transfer-view" id="wechat-transfer-modal">
                 <div class="wechat-transfer-container">
@@ -8242,7 +8528,7 @@
             </div>
 
             <style>
-                /* 微信原生红包样式 - 独立类名防冲突 */
+                /* 微信原生红包发送界面样式 - 1:1 还原 */
                 .wechat-redpacket-view {
                     background: #f1f1f1 !important;
                     z-index: 2000 !important;
@@ -8288,11 +8574,14 @@
                     background: #fff;
                     border-radius: 8px;
                     padding: 15px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
                 }
                 .redpacket-input-item {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    justify-content: space-between;
                 }
                 .redpacket-label {
                     font-size: 16px;
@@ -8306,16 +8595,18 @@
                     font-size: 16px;
                     outline: none;
                     background: transparent;
+                    color: #000;
                 }
                 .redpacket-unit {
                     font-size: 16px;
                     color: #000;
+                    margin-left: 8px;
                     flex-shrink: 0;
                 }
                 .redpacket-tip {
                     font-size: 12px;
                     color: #888;
-                    padding: 8px 16px 0;
+                    padding: 0 4px;
                 }
                 .redpacket-msg-group {
                     background: #fff;
@@ -8328,20 +8619,23 @@
                     font-size: 16px;
                     outline: none;
                     resize: none;
-                    height: 60px;
+                    height: 40px;
                     font-family: inherit;
+                    background: transparent;
+                    color: #000;
                 }
                 .redpacket-total-display {
                     text-align: center;
-                    margin: 40px 0;
+                    margin: 30px 0;
+                    color: #000;
                 }
                 .redpacket-total-display .currency {
                     font-size: 24px;
                     font-weight: 600;
-                    margin-right: 5px;
+                    margin-right: 2px;
                 }
                 .redpacket-total-display .total-num {
-                    font-size: 48px;
+                    font-size: 44px;
                     font-weight: 600;
                 }
                 .redpacket-submit-btn {
@@ -8349,11 +8643,12 @@
                     color: #fff;
                     border: none;
                     border-radius: 8px;
-                    padding: 12px;
+                    padding: 14px;
                     font-size: 17px;
                     font-weight: 600;
                     cursor: pointer;
                     transition: background 0.2s;
+                    margin-top: 10px;
                 }
                 .redpacket-submit-btn:active {
                     background: #d44747;
@@ -8378,9 +8673,8 @@
                 .dark-mode .redpacket-total-display {
                     color: #fff;
                 }
-                .dark-mode .redpacket-amount-input input,
+                .dark-mode .redpacket-input-item input,
                 .dark-mode .redpacket-msg-group textarea {
-                    background: transparent;
                     color: #fff;
                 }
             </style>
@@ -12687,6 +12981,7 @@
                     currentTranslateX = 0;
                     currentTranslateY = 0;
                     assistiveTouch.style.transition = 'none';
+                    assistiveTouch.classList.add('dragging');
                 };
 
                 const doDrag = (clientX, clientY) => {
@@ -12713,6 +13008,7 @@
                 const endDrag = () => {
                     if (!isDragging) return;
                     isDragging = false;
+                    assistiveTouch.classList.remove('dragging');
                     
                     // 将 transform 的偏移量应用到 left/top
                     let x = startLeft + currentTranslateX;
@@ -13700,7 +13996,11 @@
                 if (!messageList) return;
                 
                 const div = document.createElement('div');
-                const escapedContent = escapeHtml(content);
+                
+                // 判断是否是特殊 HTML 内容（如红包、转账、图片）
+                const trimmedContent = content.trim();
+                const isHtml = trimmedContent.startsWith('<div') || trimmedContent.startsWith('<img');
+                const finalContent = isHtml ? content : escapeHtml(content);
 
                 // 将 assistant 映射为 ai 以便使用现有 CSS
                 const displayRole = role === 'assistant' ? 'ai' : role;
@@ -13710,15 +14010,20 @@
                     div.style.alignSelf = 'center';
                     div.innerHTML = `
                         <div class="wechat-message-bubble" style="background: rgba(255, 255, 255, 0.8); color: var(--secondary-text-color); font-size: 12px; padding: 6px 12px; border-radius: 12px;">
-                            ${escapedContent}
+                            ${finalContent}
                         </div>
                     `;
                 } else {
                     div.className = `wechat-message ${displayRole}`;
                     const avatarUrl = displayRole === 'ai' ? avatar : (wechatState.profile.avatar || 'https://image-1306385190.cos.ap-nanjing.myqcloud.com/gpt/avatar_user.png');
+                    
+                    // 如果是红包或转账，气泡背景设为透明，因为自带背景
+                    const isSpecial = content.includes('wechat-redpacket') || content.includes('wechat-transfer');
+                    const bubbleStyle = isSpecial ? 'background: transparent; box-shadow: none; padding: 0;' : '';
+                    
                     div.innerHTML = `
                         <img src="${avatarUrl}" class="wechat-message-avatar">
-                        <div class="wechat-message-bubble">${escapedContent}</div>
+                        <div class="wechat-message-bubble ${isSpecial ? 'no-bg' : ''}" style="${bubbleStyle}">${finalContent}</div>
                     `;
                 }
 
@@ -14006,7 +14311,8 @@ ${actionDescInstruction}
 你可以通过在回复中加入特定的指令标签来执行操作（这些标签不会被用户看到，但系统会捕获并执行）：
 - **发布朋友圈**：使用 \`<action:moment>内容</action:moment>\` 标签。
 - **记录备忘录**：使用 \`<action:note>内容</action:note>\` 标签。
-- **重要说明**：当你成功记录备忘录或发布朋友圈后，系统会自动在对话框中生成一条提示词（如“已为你记录备忘录：...”），因此你不需要在回复中再次重复说明“我已经帮你记好了”之类的话，直接以角色的口吻继续聊天即可。
+- **发送微信红包**：使用 \`<action:redpacket>金额:祝福语</action:redpacket>\` 标签（例如：\`<action:redpacket>5.20:祝你开心每一天！</action:redpacket>\`）。
+- **重要说明**：当你成功记录备忘录或发布朋友圈后，系统会自动在对话框中生成一条提示词（如“已为你记录备忘录：...”），因此你不需要在回复中再次重复说明“我已经帮你记好了”之类的话，直接以角色的口吻继续聊天即可。当发送红包时，你只需说相关的聊天内容即可，系统会自动帮你发送红包。
 - 你可以根据对话上下文自主决定何时使用这些功能。
 
 ### 关于用户的长期记忆
@@ -14100,6 +14406,44 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                             console.log(`AI角色 ${char.name} 发布了朋友圈`);
                         } catch (e) {
                             console.error('AI发布朋友圈失败:', e);
+                        }
+                    }
+                }
+
+                // 处理发送红包
+                const rpRegex = /<action:redpacket>([\s\S]*?)<\/action:redpacket>/g;
+                let rpMatch;
+                while ((rpMatch = rpRegex.exec(reply)) !== null) {
+                    const content = rpMatch[1].trim();
+                    if (content) {
+                        try {
+                            const parts = content.split(':');
+                            const amount = parseFloat(parts[0]) || 10;
+                            const msg = parts[1] ? parts.slice(1).join(':').trim() : '恭喜发财，大吉大利';
+                            
+                            const redpacketContent = `
+                                <div class="wechat-redpacket" data-amount="${amount.toFixed(2)}" data-msg="${msg}" data-sender="ai">
+                                    <div class="wechat-redpacket-top">
+                                        <div class="wechat-redpacket-icon"></div>
+                                        <div class="wechat-redpacket-info">
+                                            <div class="wechat-redpacket-msg">${msg}</div>
+                                            <div class="wechat-redpacket-status">领取红包</div>
+                                        </div>
+                                    </div>
+                                    <div class="wechat-redpacket-bottom">微信红包</div>
+                                </div>
+                            `;
+                            
+                            // 直接插入红包消息到聊天记录中
+                            if (wechatState.activeCharacterId === char.id) {
+                                addWechatMessage(redpacketContent, 'ai', char.avatar);
+                            }
+                            char.chatHistory.push({ role: 'ai', content: redpacketContent });
+                            saveWechatData();
+                            
+                            console.log(`AI角色 ${char.name} 发送了红包: ${amount}`);
+                        } catch (e) {
+                            console.error('AI发送红包失败:', e);
                         }
                     }
                 }
@@ -14235,10 +14579,25 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                     { role: 'system', content: systemPrompt },
                     ...char.chatHistory
                         .filter(m => m.content && m.content.trim() !== '')
-                        .map(m => ({
-                            role: m.role === 'ai' ? 'assistant' : m.role,
-                            content: m.content
-                        }))
+                        .map(m => {
+                            let textContent = m.content;
+                            if (textContent.includes('wechat-redpacket')) {
+                                const amountMatch = textContent.match(/data-amount="([^"]+)"/);
+                                const msgMatch = textContent.match(/data-msg="([^"]+)"/);
+                                if (amountMatch && msgMatch) {
+                                    textContent = `[发来了一个微信红包] 金额: ${amountMatch[1]}元，留言: ${msgMatch[1]}`;
+                                }
+                            } else if (textContent.includes('wechat-transfer')) {
+                                const amountMatch = textContent.match(/<div class="transfer-amount">¥([^<]+)<\/div>/);
+                                if (amountMatch) {
+                                    textContent = `[发起了一笔微信转账] 金额: ${amountMatch[1]}元`;
+                                }
+                            }
+                            return {
+                                role: m.role === 'ai' ? 'assistant' : m.role,
+                                content: textContent
+                            };
+                        })
                 ];
 
                 // 再次强化指令，将其放在消息列表的最后，确保 AI 能够注意到
@@ -16883,14 +17242,188 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 // 添加红包消息到聊天记录
                 const char = wechatState.characters.find(c => c.id === wechatState.activeCharacterId);
                 if (char) {
-                    const redpacketContent = `<div class="wechat-redpacket">
-                        <div class="redpacket-title">${msg}</div>
-                        <div class="redpacket-amount">¥${amount.toFixed(2)}</div>
-                    </div>`;
+                    const rpId = 'rp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                    // 使用 1:1 还原的红包 HTML
+                    const redpacketContent = `
+                        <div class="wechat-redpacket" data-id="${rpId}" data-amount="${amount.toFixed(2)}" data-msg="${msg}" data-sender="user">
+                            <div class="wechat-redpacket-top">
+                                <div class="wechat-redpacket-icon"></div>
+                                <div class="wechat-redpacket-info">
+                                    <div class="wechat-redpacket-msg">${msg}</div>
+                                    <div class="wechat-redpacket-status">已发出</div>
+                                </div>
+                            </div>
+                            <div class="wechat-redpacket-bottom">微信红包</div>
+                        </div>
+                    `;
                     addWechatMessage(redpacketContent, 'user', char.avatar);
                     char.chatHistory.push({ role: 'user', content: redpacketContent });
                     saveWechatData();
+
+                    // 模拟对方领取红包并触发AI回复
+                    setTimeout(() => {
+                        // 更新历史记录中的红包状态
+                        for (let i = char.chatHistory.length - 1; i >= 0; i--) {
+                            if (char.chatHistory[i].content.includes(`data-id="${rpId}"`)) {
+                                let content = char.chatHistory[i].content;
+                                content = content.replace('class="wechat-redpacket"', 'class="wechat-redpacket" data-opened="true" style="opacity: 0.7"');
+                                content = content.replace('<div class="wechat-redpacket-status">已发出</div>', '<div class="wechat-redpacket-status">已领取</div>');
+                                char.chatHistory[i].content = content;
+                                break;
+                            }
+                        }
+
+                        const systemMsg = `"${char.name}"领取了你的红包`;
+                        char.chatHistory.push({ role: 'system', content: systemMsg });
+                        saveWechatData();
+
+                        // 仅当用户停留在当前聊天界面时，更新 DOM
+                        if (wechatState.activeCharacterId === char.id) {
+                            const rpElements = document.querySelectorAll(`.wechat-redpacket[data-id="${rpId}"]`);
+                            rpElements.forEach(rp => {
+                                rp.dataset.opened = 'true';
+                                rp.style.opacity = '0.7';
+                                const statusEl = rp.querySelector('.wechat-redpacket-status');
+                                if (statusEl) statusEl.textContent = '已领取';
+                            });
+                            addWechatMessage(systemMsg, 'system', char.avatar);
+                        }
+
+                        // 触发AI回复
+                        const fakeText = `[发来了一个微信红包] 金额: ${amount.toFixed(2)}元，留言: ${msg}`;
+                        const delayTimeVal = parseInt(localStorage.getItem('wechatDelayReplyTime') || '3');
+                        const isDelayEnabled = delayTimeVal > 0;
+                        
+                        if (isDelayEnabled) {
+                            const delayTime = delayTimeVal * 1000;
+                            if (!char.pendingUserMessages) char.pendingUserMessages = [];
+                            char.pendingUserMessages.push(fakeText);
+                            
+                            if (char.delayReplyTimer) clearTimeout(char.delayReplyTimer);
+                            
+                            char.delayReplyTimer = setTimeout(() => {
+                                const combinedMessages = [...char.pendingUserMessages];
+                                char.pendingUserMessages = [];
+                                char.isTyping = true;
+                                if (wechatState.activeCharacterId === char.id) showWechatTyping(char);
+                                processWechatAIMessage(char, combinedMessages);
+                            }, delayTime);
+                        } else {
+                            char.isTyping = true;
+                            if (wechatState.activeCharacterId === char.id) showWechatTyping(char);
+                            processWechatAIMessage(char, [fakeText]);
+                        }
+                    }, 2000); // 发出后 2 秒被模拟领取
                 }
+            }
+
+            // 处理红包点击
+            function handleRedpacketClick(e) {
+                const rp = e.target.closest('.wechat-redpacket');
+                if (!rp) return;
+
+                const amount = rp.dataset.amount;
+                const msg = rp.dataset.msg;
+                const sender = rp.dataset.sender || 'user';
+                const char = wechatState.characters.find(c => c.id === wechatState.activeCharacterId);
+                
+                if (!char) return;
+                
+                const isAI = sender === 'ai';
+                const senderName = isAI ? char.name : (wechatState.profile.nickname || '我');
+                const senderAvatar = isAI ? char.avatar : (wechatState.profile.avatar || 'https://image-1306385190.cos.ap-nanjing.myqcloud.com/gpt/avatar_user.png');
+
+                const openModal = document.getElementById('wechat-redpacket-open-modal');
+                const openAvatar = document.getElementById('redpacket-open-avatar');
+                const openName = document.getElementById('redpacket-open-name');
+                const openTitle = document.querySelector('.redpacket-open-title');
+                const openBtn = document.getElementById('redpacket-open-btn');
+                const detailContent = document.getElementById('redpacket-detail-content');
+                const openContent = document.querySelector('.redpacket-open-content');
+
+                // 重置状态
+                openBtn.classList.remove('spinning');
+                openBtn.style.display = 'flex';
+                detailContent.style.display = 'none';
+                openContent.style.display = 'flex';
+
+                // 设置数据
+                openAvatar.src = senderAvatar;
+                openName.textContent = senderName;
+                openTitle.textContent = msg;
+
+                // 检查是否是自己发出的红包
+                if (sender === 'user') {
+                    // 如果是用户自己发出的红包，直接显示详情
+                    openContent.style.display = 'none';
+                    detailContent.style.display = 'flex';
+                    const detailAvatar = document.getElementById('redpacket-detail-avatar');
+                    const detailName = document.getElementById('redpacket-detail-name');
+                    const detailMsg = document.getElementById('redpacket-detail-msg');
+                    const detailAmount = document.getElementById('redpacket-detail-amount');
+                    detailAvatar.src = senderAvatar;
+                    detailName.textContent = senderName;
+                    detailMsg.textContent = msg;
+                    detailAmount.textContent = amount;
+                    
+                    // 修改提示文字，表示是自己发的红包
+                    rp.dataset.opened = 'true';
+                    rp.querySelector('.wechat-redpacket-status').textContent = '已发出';
+                    
+                    openModal.classList.add('active');
+                    return;
+                }
+
+                // 检查是否已领取
+                const isOpened = rp.dataset.opened === 'true';
+                if (isOpened) {
+                    openContent.style.display = 'none';
+                    detailContent.style.display = 'flex';
+                    const detailAvatar = document.getElementById('redpacket-detail-avatar');
+                    const detailName = document.getElementById('redpacket-detail-name');
+                    const detailMsg = document.getElementById('redpacket-detail-msg');
+                    const detailAmount = document.getElementById('redpacket-detail-amount');
+                    detailAvatar.src = senderAvatar;
+                    detailName.textContent = senderName;
+                    detailMsg.textContent = msg;
+                    detailAmount.textContent = amount;
+                    openModal.classList.add('active');
+                    return;
+                }
+
+                // 绑定开红包事件
+                openBtn.onclick = () => {
+                    openBtn.classList.add('spinning');
+                    setTimeout(() => {
+                        // 领取逻辑
+                        const detailAvatar = document.getElementById('redpacket-detail-avatar');
+                        const detailName = document.getElementById('redpacket-detail-name');
+                        const detailMsg = document.getElementById('redpacket-detail-msg');
+                        const detailAmount = document.getElementById('redpacket-detail-amount');
+
+                        detailAvatar.src = senderAvatar;
+                        detailName.textContent = senderName;
+                        detailMsg.textContent = msg;
+                        detailAmount.textContent = amount;
+
+                        openContent.style.display = 'none';
+                        detailContent.style.display = 'flex';
+                        
+                        // 标记红包为已领取
+                        rp.dataset.opened = 'true';
+                        rp.querySelector('.wechat-redpacket-status').textContent = '已领取';
+                        rp.style.opacity = '0.7';
+                        
+                        // 如果是AI发的红包，增加钱包余额
+                        if (isAI) {
+                            walletState.balance += parseFloat(amount);
+                            saveWalletState();
+                            updateWalletBalance();
+                        }
+                    }, 1200);
+                };
+
+                openModal.classList.add('active');
             }
             
             // 绑定红包相关事件
@@ -16918,6 +17451,14 @@ ${recentHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
                 if (redpacketCloseBtn) {
                     redpacketCloseBtn.addEventListener('click', closeRedpacketModal);
                 }
+
+                // 领取红包模态框关闭
+                document.getElementById('redpacket-open-close')?.addEventListener('click', () => {
+                    document.getElementById('wechat-redpacket-open-modal').classList.remove('active');
+                });
+
+                // 聊天列表点击代理，处理红包点击
+                document.getElementById('wechat-messages')?.addEventListener('click', handleRedpacketClick);
 
                 // 转账发送按钮
                 const transferSendBtn = document.getElementById('transfer-send-btn');
