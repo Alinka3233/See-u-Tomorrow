@@ -6632,7 +6632,7 @@
             align-items: center;
             justify-content: center;
             user-select: none;
-            opacity: 0.4; /* 闲置时更透明，模仿真实iOS */
+            opacity: 0.6;
         }
         
         .dark-mode .assistive-touch {
@@ -6640,27 +6640,14 @@
             box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1) inset, 0 8px 32px rgba(0, 0, 0, 0.5);
         }
         
-        @media (hover: hover) {
-            .assistive-touch:hover {
-                opacity: 1;
-                transform: scale(1.05);
-                border-radius: 18px;
-                background: rgba(0, 0, 0, 0.8);
-            }
-
-            .dark-mode .assistive-touch:hover {
-                background: rgba(30, 30, 30, 0.9);
-            }
-        }
-        
-        .assistive-touch.active, .assistive-touch.dragging {
+        .assistive-touch:hover, .assistive-touch.active {
             opacity: 1;
             transform: scale(1.05);
             border-radius: 18px;
             background: rgba(0, 0, 0, 0.8);
         }
 
-        .dark-mode .assistive-touch.active, .dark-mode .assistive-touch.dragging {
+        .dark-mode .assistive-touch:hover, .dark-mode .assistive-touch.active {
             background: rgba(30, 30, 30, 0.9);
         }
         
@@ -12981,7 +12968,6 @@
                     currentTranslateX = 0;
                     currentTranslateY = 0;
                     assistiveTouch.style.transition = 'none';
-                    assistiveTouch.classList.add('dragging');
                 };
 
                 const doDrag = (clientX, clientY) => {
@@ -13008,7 +12994,6 @@
                 const endDrag = () => {
                     if (!isDragging) return;
                     isDragging = false;
-                    assistiveTouch.classList.remove('dragging');
                     
                     // 将 transform 的偏移量应用到 left/top
                     let x = startLeft + currentTranslateX;
